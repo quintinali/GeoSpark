@@ -9,3 +9,5 @@
 /doc/
 /conf/
 /log/
+*.iml
+*.DS_Store

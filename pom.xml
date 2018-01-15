@@ -11,5 +11,6 @@
     <module>core</module>
     <module>sql</module>    
     <module>viz</module>
+    <module>application</module>
   </modules>
 </project>
