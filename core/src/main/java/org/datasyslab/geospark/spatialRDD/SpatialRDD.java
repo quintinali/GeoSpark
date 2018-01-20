@@ -43,6 +43,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wololo.geojson.Feature;
+import org.wololo.geojson.FeatureCollection;
 import org.wololo.jts2geojson.GeoJSONWriter;
 import scala.Tuple2;
 
@@ -454,8 +455,10 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
         this.rawSpatialRDD.mapPartitions(new FlatMapFunction<Iterator<T>, String>() {
             @Override
             public Iterator<String> call(Iterator<T> iterator) throws Exception {
-                ArrayList<String> result = new ArrayList();
+                ArrayList<String> result = new ArrayList<String>();
                 GeoJSONWriter writer = new GeoJSONWriter();
+
+                List<Feature> featureList = new ArrayList<Feature>();
                 while (iterator.hasNext()) {
                 	Geometry spatialObject = (Geometry)iterator.next();
                     Feature jsonFeature;
@@ -469,9 +472,10 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
                     {
                     	jsonFeature = new Feature(writer.write(spatialObject),null);
                     }
-                    String jsonstring = jsonFeature.toString();
-                    result.add(jsonstring);
+                    featureList.add(jsonFeature);
                 }
+                FeatureCollection featureCollection = new FeatureCollection(featureList.toArray(new Feature[featureList.size()]));
+                result.add(featureCollection.toString());
                 return result.iterator();
             }
         }).saveAsTextFile(outputLocation);
