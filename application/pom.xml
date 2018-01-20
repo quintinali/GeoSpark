@@ -114,33 +114,9 @@
             <url>http://download.osgeo.org/webdav/geotools/</url>
         </repository>
     </repositories>
-
     <build>
-        <sourceDirectory>src/main/scala</sourceDirectory>
+        <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
-            <plugin>
-                <groupId>org.scalastyle</groupId>
-                <artifactId>scalastyle-maven-plugin</artifactId>
-                <version>1.0.0</version>
-                <configuration>
-                    <verbose>false</verbose>
-                    <failOnViolation>true</failOnViolation>
-                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                    <failOnWarning>false</failOnWarning>
-                    <sourceDirectory>${project.basedir}/src/main/scala</sourceDirectory>
-                    <testSourceDirectory>${project.basedir}/src/test/scala</testSourceDirectory>
-                    <configLocation>${project.basedir}/src/test/resources/scalastyle_config.xml</configLocation>
-                    <outputFile>${project.basedir}/target/scalastyle-output.xml</outputFile>
-                    <outputEncoding>UTF-8</outputEncoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -150,6 +126,7 @@
                     <target>1.7</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <!-- see http://davidb.github.com/scala-maven-plugin -->
                 <groupId>net.alchim31.maven</groupId>
@@ -182,12 +159,6 @@
                                 <arg>${project.build.directory}/.scala_dependencies</arg>
                             </args>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>doc-jar</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -257,7 +228,6 @@
             </resource>
         </resources>
     </build>
-
     <profiles>
         <profile>
             <id>release-sign-artifacts</id>
@@ -334,23 +304,9 @@
                             <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
                     </plugin>
-
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>allow-snapshots</id>
-            <activation><activeByDefault>true</activeByDefault></activation>
-            <repositories>
-                <repository>
-                    <id>snapshots-repo</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                    <releases><enabled>false</enabled></releases>
-                    <snapshots><enabled>true</enabled></snapshots>
-                </repository>
-            </repositories>
-        </profile>
     </profiles>
-
     
 </project>
