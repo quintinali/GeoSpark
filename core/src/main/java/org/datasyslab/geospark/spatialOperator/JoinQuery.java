@@ -13,6 +13,8 @@ import org.apache.log4j.Logger;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.function.FlatMapFunction;
+import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.datasyslab.geospark.enums.JoinBuildSide;
@@ -28,9 +30,12 @@ import org.datasyslab.geospark.monitoring.GeoSparkMetrics;
 import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner;
 import org.datasyslab.geospark.spatialRDD.CircleRDD;
 import org.datasyslab.geospark.spatialRDD.SpatialRDD;
+import org.opengis.referencing.operation.Transformation;
+
 import scala.Tuple2;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 
 public class JoinQuery {
@@ -159,7 +164,31 @@ public class JoinQuery {
         return collectGeometriesByKey(joinResults);
     }
 
-    public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, HashSet<T>> SpatialJoinQuery(SpatialRDD<T> spatialRDD, SpatialRDD<U> queryRDD, JoinParams joinParams) throws Exception {
+    public static <U extends Geometry, T extends Geometry> JavaRDD<T> SpatialJoinQueryToSpatialRDD(SpatialRDD<T> spatialRDD, SpatialRDD<U> queryRDD, boolean useIndex, boolean considerBoundaryIntersection) throws Exception {
+      final JoinParams joinParams = new JoinParams(useIndex, considerBoundaryIntersection, false);
+      final JavaPairRDD<U, T> joinResults = spatialJoin(queryRDD, spatialRDD, joinParams);
+
+      JavaPairRDD<U, HashSet<T>> joinResultRDD = collectGeometriesByKey(joinResults);
+
+      JavaRDD<T> result = joinResultRDD.flatMap(new FlatMapFunction<Tuple2<U,HashSet<T>>, T>() {
+        @Override
+        public Iterator<T> call(Tuple2<U, HashSet<T>> tuple2) throws Exception {
+          return tuple2._2.iterator();
+        }
+      });
+
+      JavaRDD<T> filteredResult = result.filter(new Function<T, Boolean>() {
+        @Override
+        public Boolean call(T v) throws Exception {
+          return v != null;
+        }
+      });
+
+      return filteredResult;
+    }
+
+
+  public static <U extends Geometry, T extends Geometry> JavaPairRDD<U, HashSet<T>> SpatialJoinQuery(SpatialRDD<T> spatialRDD, SpatialRDD<U> queryRDD, JoinParams joinParams) throws Exception {
         final JavaPairRDD<U, T> joinResults = spatialJoin(queryRDD, spatialRDD, joinParams);
         return collectGeometriesByKey(joinResults);
     }

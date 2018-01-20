@@ -35,7 +35,7 @@ public enum GridType implements Serializable {
 	 */
 	VORONOI,
 	/**
-	 * The voronoi.
+	 * The quadtree.
 	 */
 	QUADTREE,
 
