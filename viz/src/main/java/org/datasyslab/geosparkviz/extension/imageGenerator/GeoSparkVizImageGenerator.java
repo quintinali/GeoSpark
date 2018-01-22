@@ -53,11 +53,22 @@ public class GeoSparkVizImageGenerator {
 	 * @return true, if successful
 	 * @throws Exception the exception
 	 */
-	public boolean SaveRasterImageAsLocalFile(JavaPairRDD<Integer,ImageSerializableWrapper> distributedImage, final String outputPath, final ImageType imageType, final int zoomLevel, final int partitionOnX, final int partitionOnY) throws Exception
-	{
+	public boolean SaveRasterImageAsLocalFile(JavaPairRDD<Integer,
+                                                  ImageSerializableWrapper> distributedImage,
+                                                  final String outputPath,
+                                                  final ImageType imageType,
+                                                  final int zoomLevel,
+                                                  final int partitionOnX,
+                                                  final int partitionOnY) throws Exception {
 		logger.info("[GeoSparkViz][SaveRasterImageAsLocalFile][Start]");
 		for(int i=0;i<partitionOnX*partitionOnY;i++) {
-			deleteLocalFile(outputPath+"-"+ RasterizationUtils.getImageTileName(zoomLevel,partitionOnX, partitionOnY,i),imageType);
+			deleteLocalFile(outputPath
+                                        + "-"
+                                        + RasterizationUtils.getImageTileName(zoomLevel,
+                                                                              partitionOnX,
+                                                                              partitionOnY,
+                                                                              i),
+                                        imageType);
 		}
 		distributedImage.foreach(new VoidFunction<Tuple2<Integer, ImageSerializableWrapper>>() {
 			@Override

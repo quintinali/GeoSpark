@@ -64,34 +64,34 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	/** The Constant logger. */
 	final static Logger logger = Logger.getLogger(SpatialRDD.class);
 
-    /** The total number of records. */
-    public long approximateTotalCount=-1;
+        /** The total number of records. */
+        public long approximateTotalCount=-1;
 
-    /** The boundary envelope. */
-    public Envelope boundaryEnvelope = null;
+        /** The boundary envelope. */
+        public Envelope boundaryEnvelope = null;
 
-    /** The spatial partitioned RDD. */
-    public JavaRDD<T> spatialPartitionedRDD;
+        /** The spatial partitioned RDD. */
+        public JavaRDD<T> spatialPartitionedRDD;
 
-    /** The indexed RDD. */
-    public JavaRDD<SpatialIndex> indexedRDD;
+        /** The indexed RDD. */
+        public JavaRDD<SpatialIndex> indexedRDD;
 
-    /** The indexed raw RDD. */
-    public JavaRDD<SpatialIndex> indexedRawRDD;
+        /** The indexed raw RDD. */
+        public JavaRDD<SpatialIndex> indexedRawRDD;
 
-    /** The raw spatial RDD. */
-    public JavaRDD<T> rawSpatialRDD;
+        /** The raw spatial RDD. */
+        public JavaRDD<T> rawSpatialRDD;
 
-	/** The grids. */
-    public List<Envelope> grids;
+            /** The grids. */
+        public List<Envelope> grids;
 
-    public StandardQuadTree partitionTree;
+        public StandardQuadTree partitionTree;
 
-    private SpatialPartitioner partitioner;
+        private SpatialPartitioner partitioner;
 
-    /** The sample number. */
-    private int sampleNumber = -1;
-    
+        /** The sample number. */
+        private int sampleNumber = -1;
+
 	public int getSampleNumber() {
 		return sampleNumber;
 	}
@@ -124,7 +124,7 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	public boolean CRSTransform(String sourceEpsgCRSCode, String targetEpsgCRSCode)
 	{
 		try {
-    	CoordinateReferenceSystem sourceCRS = CRS.decode(sourceEpsgCRSCode);
+    	        CoordinateReferenceSystem sourceCRS = CRS.decode(sourceEpsgCRSCode);
 		CoordinateReferenceSystem targetCRS = CRS.decode(targetEpsgCRSCode);
 		final MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, false);
 		this.CRStransformation=true;
@@ -145,6 +145,37 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 		}
 	}
 
+        /**
+         * CRS transform.
+         *
+         * @param sourceEpsgCRSCode the source epsg CRS code
+         * @param targetEpsgCRSCode the target epsg CRS code
+         * @return true, if successful
+         */
+        public boolean CRSTransform(String sourceEpsgCRSCode, String targetEpsgCRSCode, boolean longitudeFirst)
+        {
+          try {
+            CoordinateReferenceSystem sourceCRS = CRS.decode(sourceEpsgCRSCode, longitudeFirst);
+            CoordinateReferenceSystem targetCRS = CRS.decode(targetEpsgCRSCode, longitudeFirst);
+            final MathTransform transform = CRS.findMathTransform(sourceCRS, targetCRS, false);
+            this.CRStransformation=true;
+            this.sourceEpsgCode=sourceEpsgCRSCode;
+            this.targetEpgsgCode=targetEpsgCRSCode;
+            this.rawSpatialRDD = this.rawSpatialRDD.map(new Function<T,T>()
+            {
+              @Override
+              public T call(T originalObject) throws Exception {
+                return (T) JTS.transform(originalObject,transform);
+              }
+            });
+            return true;
+          } catch (FactoryException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return false;
+          }
+        }
+
     public boolean spatialPartitioning(GridType gridType) throws Exception
     {
         int numPartitions = this.rawSpatialRDD.rdd().partitions().length;
@@ -161,41 +192,43 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	 */
 	public void spatialPartitioning(GridType gridType, int numPartitions) throws Exception
 	{
-        if (numPartitions <= 0) {
+          if (numPartitions <= 0) {
             throw new IllegalArgumentException("Number of partitions must be >= 0");
-        }
+          }
 
-		if(this.boundaryEnvelope==null)
-        {
-        	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call analyze() first.");
-        }
-        if(this.approximateTotalCount==-1)
-        {
-        	throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unkown. Please call analyze() first.");
-        }
+          if(this.boundaryEnvelope==null)
+          {
+            throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD boundary is null. Please call analyze() first.");
+          }
 
-        //Calculate the number of samples we need to take.
-        int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, this.approximateTotalCount,this.sampleNumber);
-        //Take Sample
-		// RDD.takeSample implementation tends to scan the data multiple times to gather the exact
-		// number of samples requested. Repeated scans increase the latency of the join. This increase
-		// is significant for large datasets.
-		// See https://github.com/apache/spark/blob/412b0e8969215411b97efd3d0984dc6cac5d31e0/core/src/main/scala/org/apache/spark/rdd/RDD.scala#L508
-		// Here, we choose to get samples faster over getting exactly specified number of samples.
-		final double fraction = SamplingUtils.computeFractionForSampleSize(sampleNumberOfRecords, approximateTotalCount, false);
-		List<Envelope> samples = this.rawSpatialRDD.sample(false, fraction)
-			.map(new Function<T, Envelope>() {
-				@Override
-				public Envelope call(T geometry) throws Exception {
-					return geometry.getEnvelopeInternal();
-				}
-			})
-			.collect();
+            if(this.approximateTotalCount==-1)
+          {
+            throw new Exception("[AbstractSpatialRDD][spatialPartitioning] SpatialRDD total count is unkown. Please call analyze() first.");
+          }
 
-		logger.info("Collected " + samples.size() + " samples");
+          //Calculate the number of samples we need to take.
+          int sampleNumberOfRecords = RDDSampleUtils.getSampleNumbers(numPartitions, this.approximateTotalCount,this.sampleNumber);
+          //Take Sample
+          // RDD.takeSample implementation tends to scan the data multiple times to gather the exact
+          // number of samples requested. Repeated scans increase the latency of the join. This increase
+          // is significant for large datasets.
+          // See https://github.com/apache/spark/blob/412b0e8969215411b97efd3d0984dc6cac5d31e0/core/src/main/scala/org/apache/spark/rdd/RDD.scala#L508
+          // Here, we choose to get samples faster over getting exactly specified number of samples.
+          final double fraction = SamplingUtils.computeFractionForSampleSize(sampleNumberOfRecords, approximateTotalCount, false);
+          List<Envelope> samples = this.rawSpatialRDD.sample(false, fraction)
+              .map(new Function<T, Envelope>() {
+                @Override
+                public Envelope call(T geometry) throws Exception {
+                  return geometry.getEnvelopeInternal();
+                  }
+                  })
+              .collect();
+
+          logger.info("Collected " + samples.size() + " samples");
 
 		// Add some padding at the top and right of the boundaryEnvelope to make
 		// sure all geometries lie within the half-open rectangle.
+                // TODO: Is the padding value reasonable here? The ratio number may be more reasonable.
 		final Envelope paddedBoundary = new Envelope(
 			boundaryEnvelope.getMinX(), boundaryEnvelope.getMaxX() + 0.01,
 			boundaryEnvelope.getMinY(), boundaryEnvelope.getMaxY() + 0.01);
@@ -208,20 +241,20 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 				break;
 			}
 			case HILBERT: {
-				HilbertPartitioning hilbertPartitioning=new HilbertPartitioning(samples, paddedBoundary, numPartitions);
-				grids=hilbertPartitioning.getGrids();
+				HilbertPartitioning hilbertPartitioning = new HilbertPartitioning(samples, paddedBoundary, numPartitions);
+				grids = hilbertPartitioning.getGrids();
 				partitioner = new FlatGridPartitioner(grids);
 				break;
 			}
 			case RTREE: {
-				RtreePartitioning rtreePartitioning=new RtreePartitioning(samples, numPartitions);
-				grids=rtreePartitioning.getGrids();
+				RtreePartitioning rtreePartitioning = new RtreePartitioning(samples, numPartitions);
+				grids = rtreePartitioning.getGrids();
 				partitioner = new FlatGridPartitioner(grids);
 				break;
 			}
 			case VORONOI: {
-				VoronoiPartitioning voronoiPartitioning=new VoronoiPartitioning(samples, numPartitions);
-				grids=voronoiPartitioning.getGrids();
+				VoronoiPartitioning voronoiPartitioning = new VoronoiPartitioning(samples, numPartitions);
+				grids = voronoiPartitioning.getGrids();
 				partitioner = new FlatGridPartitioner(grids);
 				break;
 			}
@@ -365,15 +398,15 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	        }
 	}
 
-    /**
-     * Boundary.
-     * @deprecated Call analyze() instead
-     * @return the envelope
-     */
-    public Envelope boundary() {
-		this.analyze();
-        return this.boundaryEnvelope;
-    }
+        /**
+         * Boundary.
+         * @deprecated Call analyze() instead
+         * @return the envelope
+         */
+        public Envelope boundary() {
+                    this.analyze();
+            return this.boundaryEnvelope;
+        }
 
 	/**
 	 * Gets the raw spatial RDD.

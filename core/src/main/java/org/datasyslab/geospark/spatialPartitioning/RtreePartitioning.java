@@ -35,12 +35,12 @@ public class RtreePartitioning implements Serializable{
 		STRtree strtree=new STRtree(samples.size()/partitions);
 		for (Envelope sample : samples) {
 			strtree.insert(sample, sample);
-    	}
+    	        }
 
-    	List<Envelope> envelopes=strtree.queryBoundary();
+                List<Envelope> envelopes = strtree.queryBoundary();
 		for (Envelope envelope : envelopes) {
-    		grids.add(envelope);
-    	}
+		  grids.add(envelope);
+                }
 	}
 	
 	/**
