@@ -164,27 +164,24 @@ public class JoinQuery {
         return collectGeometriesByKey(joinResults);
     }
 
-    public static <U extends Geometry, T extends Geometry> JavaRDD<T> SpatialJoinQueryToSpatialRDD(SpatialRDD<T> spatialRDD, SpatialRDD<U> queryRDD, boolean useIndex, boolean considerBoundaryIntersection) throws Exception {
+    public static <U extends Geometry, T extends Geometry> JavaRDD<U> SpatialIntersectQuery(SpatialRDD<T> spatialRDD, SpatialRDD<U> queryRDD, boolean useIndex, boolean considerBoundaryIntersection) throws Exception {
       final JoinParams joinParams = new JoinParams(useIndex, considerBoundaryIntersection, false);
       final JavaPairRDD<U, T> joinResults = spatialJoin(queryRDD, spatialRDD, joinParams);
 
-      JavaPairRDD<U, HashSet<T>> joinResultRDD = collectGeometriesByKey(joinResults);
-
-      JavaRDD<T> result = joinResultRDD.flatMap(new FlatMapFunction<Tuple2<U,HashSet<T>>, T>() {
+      JavaRDD<U> intersectedRDD = joinResults.map(new Function<Tuple2<U, T>, U>() {
         @Override
-        public Iterator<T> call(Tuple2<U, HashSet<T>> tuple2) throws Exception {
-          return tuple2._2.iterator();
+        public U call(Tuple2<U, T> v1) throws Exception {
+          U intersection = (U) v1._1.intersection(v1._2);
+          return intersection;
+        }
+      }).filter(new Function<U, Boolean>() {
+        @Override
+        public Boolean call(U v1) {
+          return !v1.isEmpty();
         }
       });
 
-      JavaRDD<T> filteredResult = result.filter(new Function<T, Boolean>() {
-        @Override
-        public Boolean call(T v) throws Exception {
-          return v != null;
-        }
-      });
-
-      return filteredResult;
+      return intersectedRDD;
     }
 
 
