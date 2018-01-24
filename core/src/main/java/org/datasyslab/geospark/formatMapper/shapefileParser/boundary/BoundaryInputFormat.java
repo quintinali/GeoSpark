@@ -21,7 +21,9 @@ import java.util.List;
 
 public class BoundaryInputFormat extends CombineFileInputFormat<Long, BoundBox> {
     @Override
-    public RecordReader<Long, BoundBox> createRecordReader(InputSplit inputSplit, TaskAttemptContext taskAttemptContext) throws IOException {
+    public RecordReader<Long, BoundBox> createRecordReader(InputSplit inputSplit,
+                                                           TaskAttemptContext taskAttemptContext)
+        throws IOException {
         return new BoundaryRecordReader();
     }
 
@@ -45,12 +47,12 @@ public class BoundaryInputFormat extends CombineFileInputFormat<Long, BoundBox> 
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
         // get original combine split.
-        CombineFileSplit combineSplit = (CombineFileSplit)super.getSplits(job).get(0);
+        CombineFileSplit combineSplit = (CombineFileSplit) super.getSplits(job).get(0);
         Path[] paths = combineSplit.getPaths();
 
         // get indexes of all .shp file
         List<Integer> shpIds = new ArrayList<>();
-        for(int i = 0;i < paths.length; ++i){
+        for(int i = 0; i < paths.length; ++i){
             if(FilenameUtils.getExtension(paths[i].toString()).equals("shp")){
                 shpIds.add(i);
             }

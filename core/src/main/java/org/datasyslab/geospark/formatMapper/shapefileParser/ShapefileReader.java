@@ -53,7 +53,8 @@ public class ShapefileReader {
      * @param geometryFactory
      * @return
      */
-    public static JavaRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory){
+    public static JavaRDD<Geometry> readToGeometryRDD(JavaSparkContext sc, String inputPath,
+                                                      final GeometryFactory geometryFactory){
         return readShapefile(sc, inputPath, geometryFactory);
     }
 
@@ -67,8 +68,7 @@ public class ShapefileReader {
     private static JavaRDD<Geometry> readShapefile(
             JavaSparkContext sc,
             String inputPath,
-            final GeometryFactory geometryFactory
-    )
+            final GeometryFactory geometryFactory)
     {
         JavaPairRDD<ShapeKey, PrimitiveShape> shapePrimitiveRdd = sc.newAPIHadoopFile(
                 inputPath,
@@ -113,8 +113,9 @@ public class ShapefileReader {
         });
         // if there is a result assign it to variable : boundBox
         if(bounds.count() > 0){
-            return new BoundBox(bounds.collect().get(0)._2());
-        }else return null;
+          return new BoundBox(bounds.collect().get(0)._2());
+        }else
+          return null;
     }
 
 
@@ -142,7 +143,8 @@ public class ShapefileReader {
      * @param geometryFactory
      * @return
      */
-    public static PolygonRDD readToPolygonRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory){
+    public static PolygonRDD readToPolygonRDD(JavaSparkContext sc, String inputPath,
+                                              final GeometryFactory geometryFactory){
         return geometryToPolygon(readToGeometryRDD(sc, inputPath, geometryFactory));
     }
 
@@ -159,8 +161,8 @@ public class ShapefileReader {
                 List<Polygon> result = new ArrayList<Polygon>();
                 if (spatialObject instanceof MultiPolygon)
                 {
-                    MultiPolygon multiObjects = (MultiPolygon)spatialObject;
-                    for (int i=0;i<multiObjects.getNumGeometries();i++)
+                    MultiPolygon multiObjects = (MultiPolygon) spatialObject;
+                    for (int i=0; i < multiObjects.getNumGeometries(); i++)
                     {
                         Polygon oneObject = (Polygon) multiObjects.getGeometryN(i);
                         oneObject.setUserData(multiObjects.getUserData());
@@ -173,7 +175,9 @@ public class ShapefileReader {
                 }
                 else
                 {
-                    throw new Exception("[ShapefileRDD][getPolygonRDD] the object type is not Polygon or MultiPolygon type. It is "+spatialObject.getGeometryType());
+                    throw new Exception("[ShapefileRDD][getPolygonRDD] the object type is not "
+                                        + "Polygon or MultiPolygon type. It is "
+                                        + spatialObject.getGeometryType());
                 }
                 return result.iterator();
             }
@@ -198,7 +202,8 @@ public class ShapefileReader {
      * @param geometryFactory
      * @return
      */
-    public static PointRDD readToPointRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory){
+    public static PointRDD readToPointRDD(JavaSparkContext sc, String inputPath,
+                                          final GeometryFactory geometryFactory) {
         return geometryToPoint(readToGeometryRDD(sc, inputPath, geometryFactory));
     }
 
@@ -230,7 +235,9 @@ public class ShapefileReader {
                         }
                         else
                         {
-                            throw new Exception("[ShapefileRDD][getPointRDD] the object type is not Point or MultiPoint type. It is "+spatialObject.getGeometryType());
+                            throw new Exception("[ShapefileRDD][getPointRDD] the object type is not "
+                                                + "Point or MultiPoint type. It is "
+                                                + spatialObject.getGeometryType());
                         }
                         return result.iterator();
                     }
@@ -256,7 +263,8 @@ public class ShapefileReader {
      * @param geometryFactory
      * @return
      */
-    public static LineStringRDD readToLineStringRDD(JavaSparkContext sc, String inputPath, final GeometryFactory geometryFactory){
+    public static LineStringRDD readToLineStringRDD(JavaSparkContext sc, String inputPath,
+                                                    final GeometryFactory geometryFactory){
         return geometryToLineString(readToGeometryRDD(sc, inputPath, geometryFactory));
     }
 
@@ -275,7 +283,7 @@ public class ShapefileReader {
                         if(spatialObject instanceof MultiLineString)
                         {
                             MultiLineString multiObjects = (MultiLineString)spatialObject;
-                            for (int i=0;i<multiObjects.getNumGeometries();i++)
+                            for (int i = 0; i < multiObjects.getNumGeometries(); i++)
                             {
                                 LineString oneObject = (LineString) multiObjects.getGeometryN(i);
                                 oneObject.setUserData(multiObjects.getUserData());

@@ -77,7 +77,7 @@ public class BoundaryRecordReader extends RecordReader<Long, BoundBox>{
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
-        return (float)id / (float)paths.length;
+        return (float)id / (float) paths.length;
     }
 
     @Override

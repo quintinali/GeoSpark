@@ -41,7 +41,7 @@ public class ShapeInputFormat extends CombineFileInputFormat<ShapeKey, Primitive
         String path = job.getConfiguration().get("mapred.input.dir");
         String[] paths = path.split(",");
         List<InputSplit> splits = new ArrayList<>();
-        for(int i = 0;i < paths.length; ++i){
+        for(int i = 0; i < paths.length; ++i){
             job.getConfiguration().set("mapred.input.dir", paths[i]);
             splits.add(super.getSplits(job).get(0));
         }

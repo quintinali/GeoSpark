@@ -68,7 +68,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     public void initialize(InputSplit split, TaskAttemptContext context)
             throws IOException, InterruptedException
     {
-        CombineFileSplit fileSplit = (CombineFileSplit)split;
+        CombineFileSplit fileSplit = (CombineFileSplit) split;
         Path[] paths = fileSplit.getPaths();
         for(int i = 0;i < paths.length; ++i){
             String suffix = FilenameUtils.getExtension(paths[i].toString());
