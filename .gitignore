@@ -9,5 +9,8 @@
 /doc/
 /conf/
 /log/
+*.json
+*.geojson
+application/src/main/resources/data/
 *.iml
 *.DS_Store

@@ -383,18 +383,21 @@ public class SpatialRDD<T extends Geometry> implements Serializable{
 	 * @param buildIndexOnSpatialPartitionedRDD the build index on spatial partitioned RDD
 	 * @throws Exception the exception
 	 */
-	public void buildIndex(final IndexType indexType,boolean buildIndexOnSpatialPartitionedRDD) throws Exception {
-	      if (buildIndexOnSpatialPartitionedRDD==false) {
+	public void buildIndex(final IndexType indexType, boolean buildIndexOnSpatialPartitionedRDD)
+            throws Exception {
+	      if (buildIndexOnSpatialPartitionedRDD == false) {
 	    	  //This index is built on top of unpartitioned SRDD
 	    	  this.indexedRawRDD =  this.rawSpatialRDD.mapPartitions(new IndexBuilder(indexType));
 	        }
 	        else
 	        {
-	        	if(this.spatialPartitionedRDD==null)
-	        	{
-  				  throw new Exception("[AbstractSpatialRDD][buildIndex] spatialPartitionedRDD is null. Please do spatial partitioning before build index.");
-	        	}
-				this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new IndexBuilder(indexType));
+	          if(this.spatialPartitionedRDD==null) {
+	              throw new Exception("[AbstractSpatialRDD][buildIndex] "
+                                          + "spatialPartitionedRDD is null. Please do "
+                                          + "spatial partitioning before build index.");
+	          }
+
+	          this.indexedRDD = this.spatialPartitionedRDD.mapPartitions(new IndexBuilder(indexType));
 	        }
 	}
 

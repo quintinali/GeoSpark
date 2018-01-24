@@ -144,7 +144,9 @@ public class FormatMapper implements Serializable {
             {
                 if(this.geometryType==null)
                 {
-                    throw new IllegalArgumentException("[GeoSpark][FormatMapper] You must specify GeometryType when you use delimiter rather WKT or GeoJSON");
+                    throw new IllegalArgumentException("[GeoSpark][FormatMapper] You must specify "
+                                                       + "GeometryType when you use delimiter rather "
+                                                       + "WKT or GeoJSON");
                 }
                 else
                 {

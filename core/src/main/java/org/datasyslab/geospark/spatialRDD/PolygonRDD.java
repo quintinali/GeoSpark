@@ -70,8 +70,13 @@ public class PolygonRDD extends SpatialRDD<Polygon> {
      * @param carryInputData the carry input data
      * @param partitions the partitions
      */
-    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset, Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
-        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions).mapPartitions(new PolygonFormatMapper(startOffset,endOffset, splitter,carryInputData)));
+    public PolygonRDD(JavaSparkContext sparkContext, String InputLocation, Integer startOffset,
+                      Integer endOffset, FileDataSplitter splitter, boolean carryInputData, Integer partitions) {
+        this.setRawSpatialRDD(sparkContext.textFile(InputLocation, partitions)
+                                  .mapPartitions(new PolygonFormatMapper(startOffset,
+                                                                         endOffset,
+                                                                         splitter,
+                                                                         carryInputData)));
     }
 
     /**
