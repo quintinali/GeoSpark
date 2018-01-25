@@ -6,6 +6,10 @@
  */
 package org.datasyslab.geospark.formatMapper.shapefileParser.boundary;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.Polygon;
+
 import java.io.Serializable;
 import java.util.Arrays;
 

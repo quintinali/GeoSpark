@@ -104,8 +104,8 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
         long recordLength = 2 * (contentLength + 4);
         remainLength -= recordLength;
         int typeID = EndianUtils.swapInteger(reader.readInt());
-        byte[] contentArray = new byte[length];// exclude the 4 bytes we read for shape type
-        reader.read(contentArray,0,contentArray.length);
+        byte[] contentArray = new byte[length]; // exclude the 4 bytes we read for shape type
+        reader.read(contentArray,0, contentArray.length);
         return new ShpRecord(contentArray, typeID);
     }
 

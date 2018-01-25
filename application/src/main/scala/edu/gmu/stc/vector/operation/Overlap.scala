@@ -1,4 +1,4 @@
-package edu.gmu.stc.vector.application
+package edu.gmu.stc.vector.operation
 
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.{SQLContext, SparkSession}

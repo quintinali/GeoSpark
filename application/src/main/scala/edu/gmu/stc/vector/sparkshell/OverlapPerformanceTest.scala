@@ -1,7 +1,7 @@
 package edu.gmu.stc.vector.sparkshell
 
-import edu.gmu.stc.vector.application.Overlap.intersect
-import edu.gmu.stc.vector.application.TaskUtil.show_timing
+import edu.gmu.stc.vector.operation.Overlap.intersect
+import edu.gmu.stc.vector.operation.TaskUtil.show_timing
 import edu.gmu.stc.vector.sparkshell.OverlapShellExample.sc
 import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.{SparkConf, SparkContext}
