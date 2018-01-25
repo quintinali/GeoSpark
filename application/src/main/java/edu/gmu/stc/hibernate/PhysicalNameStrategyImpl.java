@@ -7,10 +7,10 @@ import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 /**
  * Created by Fei Hu on 1/25/18.
  */
-public class DocumentNameStrategy implements PhysicalNamingStrategy {
-  private String tableName = "";
+public class PhysicalNameStrategyImpl implements PhysicalNamingStrategy {
+  private String tableName;
 
-  public DocumentNameStrategy(String tableName) {
+  public PhysicalNameStrategyImpl(String tableName) {
     this.tableName = tableName;
   }
 
@@ -32,11 +32,11 @@ public class DocumentNameStrategy implements PhysicalNamingStrategy {
 
   @Override
   public Identifier toPhysicalSequenceName(Identifier name, JdbcEnvironment jdbcEnvironment) {
-    return null;
+    return name;
   }
 
   @Override
   public Identifier toPhysicalColumnName(Identifier name, JdbcEnvironment jdbcEnvironment) {
-    return null;
+    return name;
   }
 }
