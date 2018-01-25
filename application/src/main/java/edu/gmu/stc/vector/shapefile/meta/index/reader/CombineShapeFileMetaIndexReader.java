@@ -4,7 +4,7 @@
  * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
-package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
+package edu.gmu.stc.vector.shapefile.meta.index;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -17,13 +17,16 @@ import org.apache.hadoop.mapreduce.lib.input.CombineFileSplit;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.log4j.Logger;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeType;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.DbfFileReader;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeFileReader;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 
-public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
+public class CombineShapeFileMetaIndexReader extends RecordReader<ShapeKey, PrimitiveShape> {
 
     /** id of input path of .shp file */
     private FileSplit shpSplit = null;
@@ -56,7 +59,7 @@ public class CombineShapeReader extends RecordReader<ShapeKey, PrimitiveShape> {
     private boolean hasNextDbf = false;
 
     /** dubug logger */
-    final static Logger logger = Logger.getLogger(CombineShapeReader.class);
+    final static Logger logger = Logger.getLogger(CombineShapeFileMetaIndexReader.class);
 
     /**
      * cut the combined split into FileSplit for .shp, .shx and .dbf
