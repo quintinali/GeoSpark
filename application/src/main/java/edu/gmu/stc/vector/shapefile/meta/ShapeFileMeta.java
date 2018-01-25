@@ -1,5 +1,8 @@
 package edu.gmu.stc.vector.shapefile.meta;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.Serializable;
 
 import javax.persistence.Column;
@@ -11,6 +14,8 @@ import javax.persistence.Id;
  */
 @Entity
 public class ShapeFileMeta implements Serializable {
+  private static final Log LOG = LogFactory.getLog(ShapeFileMeta.class);
+
   @Id
   private Long index;
   @Column(name = "typeID")
@@ -23,8 +28,6 @@ public class ShapeFileMeta implements Serializable {
   private long dbf_offset;
   @Column(name = "dbf_length")
   private int dbf_length;
-  @Column(name = "filePath")
-  private String filePath;
   @Column(name = "minX")
   private double minX;
   @Column(name = "minY")
@@ -33,6 +36,8 @@ public class ShapeFileMeta implements Serializable {
   private double maxX;
   @Column(name = "maxY")
   private double maxY;
+  @Column(name = "filePath")
+  private String filePath;
 
   public ShapeFileMeta(Long index, int typeID, long shp_offset, int shp_length, long dbf_offset,
                        int dbf_length, String filePath, double minX, double minY, double maxX,
@@ -61,6 +66,11 @@ public class ShapeFileMeta implements Serializable {
     this.dbf_length = dbfMeta.getLength();
 
     this.filePath = filePath;
+
+    this.minX = shpMeta.getBoundBox().getXMin();
+    this.minY = shpMeta.getBoundBox().getYMin();
+    this.maxX = shpMeta.getBoundBox().getXMax();
+    this.maxY = shpMeta.getBoundBox().getYMax();
   }
 
   public Long getIndex() {
@@ -157,5 +167,13 @@ public class ShapeFileMeta implements Serializable {
                          + "\t dbf_offset: %d, dbf_length: %d",
                          index, typeID, shp_offset,
                          shp_length, dbf_offset, dbf_length);
+  }
+
+  public static String getSQLForOverlappedRows(String tableName, double minX, double minY, double maxX, double maxY) {
+
+    String sql = String.format("FROM %s WHERE (%f < minX OR %f > maxX OR %f < minY OR %f > maxY) = FALSE",
+                               tableName, maxX, minX, maxY, minY).toLowerCase();
+    LOG.info("SQL for querying overlapped rows: " + sql);
+    return sql;
   }
 }
