@@ -1,4 +1,4 @@
-package edu.gmu.stc.vector.application
+package edu.gmu.stc.vector.operation
 
 /**
   * Created by Fei Hu on 1/23/18.
