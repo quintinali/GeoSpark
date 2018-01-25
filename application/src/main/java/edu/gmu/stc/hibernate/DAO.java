@@ -1,7 +1,5 @@
-package gov.nasa.gsfc.cisto.cds.sia.core.common;
+package edu.gmu.stc.hibernate;
 
-import gov.nasa.gsfc.cisto.cds.sia.core.preprocessing.datasetparsers.SiaFilePathCompositeKey;
-import gov.nasa.gsfc.cisto.cds.sia.core.preprocessing.datasetparsers.SiaVariableCompositeKey;
 import org.hibernate.Session;
 
 import java.util.List;
@@ -29,24 +27,6 @@ public interface DAO<T> {
      */
 // Read
     T findByName(Class<T> type, String name);
-
-    /**
-     * Find variable by key t.
-     *
-     * @param type                    the type
-     * @param siaVariableCompositeKey the sia variable composite key
-     * @return the t
-     */
-    T findVariableByKey(Class<T> type, SiaVariableCompositeKey siaVariableCompositeKey);
-
-    /**
-     * Find file path by key t.
-     *
-     * @param type                    the type
-     * @param siaFilePathCompositeKey the sia file path composite key
-     * @return the t
-     */
-    T findFilePathByKey(Class<T> type, SiaFilePathCompositeKey siaFilePathCompositeKey);
 
     /**
      * Find by id t.

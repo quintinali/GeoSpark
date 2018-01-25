@@ -1,14 +1,15 @@
-package gov.nasa.gsfc.cisto.cds.sia.core.common;
+package edu.gmu.stc.hibernate;
 
-import gov.nasa.gsfc.cisto.cds.sia.core.preprocessing.datasetparsers.SiaFilePathCompositeKey;
-import gov.nasa.gsfc.cisto.cds.sia.core.preprocessing.datasetparsers.SiaVariableCompositeKey;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
+
+import java.util.List;
 
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import java.util.List;
 
 /**
  * The type Dao.
@@ -16,6 +17,7 @@ import java.util.List;
  * @param <T> the type parameter
  */
 public class DAOImpl<T> implements DAO {
+    private static final Log LOG = LogFactory.getLog(DAOImpl.class);
 
     /**
      * The Session.
@@ -56,39 +58,7 @@ public class DAOImpl<T> implements DAO {
         return result;
     }
 
-    public Object findVariableByKey(Class type, SiaVariableCompositeKey siaVariableCompositeKey) {
-        if(!isSetup()) {
-            System.exit(-1);
-        }
 
-        Object result = null;
-
-        try {
-            result = session.get(type, siaVariableCompositeKey);
-        } catch(Exception e) {
-            System.err.println("Error when attempting to retrieve variable via composite key: " + e);
-            e.printStackTrace();
-            session.getTransaction().rollback();
-        }
-        return result;
-    }
-
-    public Object findFilePathByKey(Class type, SiaFilePathCompositeKey siaFilePathCompositeKey) {
-        if(!isSetup()) {
-            System.exit(-1);
-        }
-
-        Object result = null;
-
-        try {
-            result = session.get(type, siaFilePathCompositeKey);
-        } catch(Exception e) {
-            System.err.println("Error when attempting to retrieve file path via composite key: " + e);
-            e.printStackTrace();
-            session.getTransaction().rollback();
-        }
-        return result;
-    }
 
     public Object findById(String tableName, Integer id) {
         if(!isSetup()) {
@@ -168,6 +138,26 @@ public class DAOImpl<T> implements DAO {
         }
 
         return objects;
+    }
+
+    public void createTableFromAnother(String newTableName, String templateTableName) {
+      if(!isSetup()) {
+        System.exit(-1);
+      }
+
+      try {
+        session.beginTransaction();
+        String createTableFromTemplateSQL = String.format("CREATE TABLE %s AS (SELECT * FROM %s WHERE 1=2)",
+                                                       newTableName,
+                                                       templateTableName);
+        LOG.info("Create Table From Template : " + createTableFromTemplateSQL);
+        session.createSQLQuery(createTableFromTemplateSQL).executeUpdate();
+        session.close();
+      } catch(Exception e) {
+        LOG.error("Unable to create table: " + e);
+        e.printStackTrace();
+        session.getTransaction().rollback();
+      }
     }
 
     public void insertList(List list) {
