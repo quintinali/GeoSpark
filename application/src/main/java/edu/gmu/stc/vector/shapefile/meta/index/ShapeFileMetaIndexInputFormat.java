@@ -4,24 +4,28 @@
  * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
-package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
+package edu.gmu.stc.vector.shapefile.meta.index;
 
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.CombineFileInputFormat;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.CombineShapeReader;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey;
 
-import javax.security.auth.login.Configuration;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShapeInputFormat extends CombineFileInputFormat<ShapeKey, PrimitiveShape> {
-    public RecordReader<ShapeKey, PrimitiveShape> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException {
-        return new CombineShapeReader();
+import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta;
+import edu.gmu.stc.vector.shapefile.meta.index.reader.CombineShapeFileMetaIndexReader;
+
+public class ShapeFileMetaIndexInputFormat extends CombineFileInputFormat<ShapeKey, ShapeFileMeta> {
+    public RecordReader<ShapeKey, ShapeFileMeta> createRecordReader(InputSplit split, TaskAttemptContext context) throws IOException {
+        return new CombineShapeFileMetaIndexReader();
     }
 
     /**

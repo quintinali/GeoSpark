@@ -4,10 +4,12 @@
  * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
-package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf;
+package edu.gmu.stc.vector.shapefile.meta.index.parser;
 
 import org.apache.commons.io.EndianUtils;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.io.Text;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.FieldDescriptor;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst;
 
 import java.io.DataInputStream;
@@ -16,7 +18,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DbfParseUtil implements ShapeFileConst {
+import edu.gmu.stc.vector.shapefile.meta.DbfMeta;
+
+public class DbfMetaParser implements ShapeFileConst {
 
     /** number of record get from header */
     public int numRecord = 0;
@@ -105,7 +109,7 @@ public class DbfParseUtil implements ShapeFileConst {
      * @return
      * @throws IOException
      */
-    public String parsePrimitiveRecord(DataInputStream inputStream) throws IOException {
+    public DbfMeta parsePrimitiveRecord(FSDataInputStream inputStream) throws IOException {
         if(isDone()) return null;
         byte flag = inputStream.readByte();
         final int recordLength = numBytesRecord - 1;//exclude skip the record flag when read and skip
@@ -116,9 +120,12 @@ public class DbfParseUtil implements ShapeFileConst {
         }
         if(flag == FILE_END_FLAG) return null;
         byte[] primitiveBytes = new byte[recordLength];
-        inputStream.readFully(primitiveBytes);
+        DbfMeta dbfMeta = new DbfMeta(numRecordRead, inputStream.getPos(), recordLength);
+        //inputStream.readFully(primitiveBytes);
+        inputStream.skipBytes(recordLength);
         numRecordRead++; //update number of record read
-        return primitiveToAttributes(ByteBuffer.wrap(primitiveBytes));
+        //return primitiveToAttributes(ByteBuffer.wrap(primitiveBytes));
+        return dbfMeta;
     }
 
     /**

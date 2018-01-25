@@ -4,17 +4,27 @@
  * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
-package org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp;
+package edu.gmu.stc.vector.shapefile.meta.index.parser;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 import org.apache.commons.io.EndianUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.datasyslab.geospark.formatMapper.shapefileParser.boundary.BoundBox;
+import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShapeFileConst;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-public class ShpFileParser implements Serializable, ShapeFileConst{
+import edu.gmu.stc.vector.shapefile.meta.ShpMeta;
+
+public class ShpFileMetaParser implements Serializable, ShapeFileConst{
+
+  public static GeometryFactory geometryFactory = new GeometryFactory();
 
     /** lenth of file in bytes */
     private long fileLength = 0;
@@ -43,6 +53,12 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
             return ByteBuffer.wrap(bytes).getInt();
         }
 
+        public double readDouble() throws IOException {
+          byte[] bytes = new byte[ShapeFileConst.DOUBLE_LENGTH];
+          input.readFully(bytes);
+          return ByteBuffer.wrap(bytes).getDouble();
+        }
+
         public void skip(int numBytes) throws IOException {
             input.skip(numBytes);
         }
@@ -50,13 +66,17 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
         public void read(byte[] buffer, int offset, int length) throws IOException {
             input.readFully(buffer, offset, length);
         }
+
+        public long getPos() throws IOException {
+            return this.input.getPos();
+        }
     }
 
     /**
      * create a new shape file parser with a input source that is instance of DataInputStream
      * @param inputStream
      */
-    public ShpFileParser(FSDataInputStream inputStream) {
+    public ShpFileMetaParser(FSDataInputStream inputStream) {
         reader = new SafeReader(inputStream);
     }
 
@@ -82,15 +102,24 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
      * @return
      * @throws IOException
      */
-    public ShpRecord parseRecordPrimitiveContent() throws IOException{
+    public ShpMeta parseRecordPrimitiveContent() throws IOException{
         // get length of record content
         int contentLength = reader.readInt();
         long recordLength = 2 * (contentLength + 4);
         remainLength -= recordLength;
         int typeID = EndianUtils.swapInteger(reader.readInt());
-        byte[] contentArray = new byte[contentLength * 2 - INT_LENGTH];// exclude the 4 bytes we read for shape type
-        reader.read(contentArray,0,contentArray.length);
-        return new ShpRecord(contentArray, typeID);
+        int length = contentLength * 2 - INT_LENGTH; // exclude the 4 bytes we read for shape type
+        long offset = reader.getPos();
+        double[] bounds = new double[4]; //in the order Xmin, Ymin, Xmax, Ymax
+
+        for (int i = 0; i < bounds.length; i++) {
+          bounds[i] = reader.readDouble();
+        }
+
+        reader.skip(length - 4 * DOUBLE_LENGTH);
+
+        BoundBox boundBox = new BoundBox(bounds);
+        return new ShpMeta(typeID, offset, length, boundBox);
     }
 
     /**
@@ -98,15 +127,24 @@ public class ShpFileParser implements Serializable, ShapeFileConst{
      * @return
      * @throws IOException
      */
-    public ShpRecord parseRecordPrimitiveContent(int length) throws IOException{
+    public ShpMeta parseRecordPrimitiveContent(int length) throws IOException{
         // get length of record content
         int contentLength = reader.readInt();
         long recordLength = 2 * (contentLength + 4);
         remainLength -= recordLength;
         int typeID = EndianUtils.swapInteger(reader.readInt());
-        byte[] contentArray = new byte[length];// exclude the 4 bytes we read for shape type
-        reader.read(contentArray,0,contentArray.length);
-        return new ShpRecord(contentArray, typeID);
+
+        long offset = reader.getPos();
+        double[] bounds = new double[4]; //in the order Xmin, Ymin, Xmax, Ymax
+
+        for (int i = 0; i < bounds.length; i++) {
+          bounds[i] = EndianUtils.swapDouble(reader.readDouble());
+        }
+
+        reader.skip(length - 4 * DOUBLE_LENGTH);
+
+        BoundBox boundBox = new BoundBox(bounds);
+        return new ShpMeta(typeID, offset, length, boundBox);
     }
 
     /**

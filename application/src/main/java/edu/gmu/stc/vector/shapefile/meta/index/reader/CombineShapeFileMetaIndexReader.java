@@ -4,7 +4,7 @@
  * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
-package edu.gmu.stc.vector.shapefile.meta.index;
+package edu.gmu.stc.vector.shapefile.meta.index.reader;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -26,7 +26,11 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
-public class CombineShapeFileMetaIndexReader extends RecordReader<ShapeKey, PrimitiveShape> {
+import edu.gmu.stc.vector.shapefile.meta.DbfMeta;
+import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta;
+import edu.gmu.stc.vector.shapefile.meta.ShpMeta;
+
+public class CombineShapeFileMetaIndexReader extends RecordReader<ShapeKey, ShapeFileMeta> {
 
     /** id of input path of .shp file */
     private FileSplit shpSplit = null;
@@ -38,10 +42,10 @@ public class CombineShapeFileMetaIndexReader extends RecordReader<ShapeKey, Prim
     private FileSplit dbfSplit = null;
 
     /** RecordReader for .shp file */
-    private ShapeFileReader shapeFileReader = null;
+    private ShapeFileMetaReader shapeFileMetaReader = null;
 
     /** RecordReader for .dbf file */
-    private DbfFileReader dbfFileReader = null;
+    private DbfFileMetaReader dbfFileReader = null;
 
     /** suffix of attribute file */
     private final static String DBF_SUFFIX = "dbf";
@@ -98,12 +102,12 @@ public class CombineShapeFileMetaIndexReader extends RecordReader<ShapeKey, Prim
                 IntBuffer buffer = ByteBuffer.wrap(bytes).asIntBuffer();
                 int[] indexes = new int[shxFileLength / 4];
                 buffer.get(indexes);
-                shapeFileReader = new ShapeFileReader(indexes);
-            }else shapeFileReader = new ShapeFileReader(); // no index, construct with no parameter
-            shapeFileReader.initialize(shpSplit, context);
+                shapeFileMetaReader = new ShapeFileMetaReader(indexes);
+            }else shapeFileMetaReader = new ShapeFileMetaReader(); // no index, construct with no parameter
+            shapeFileMetaReader.initialize(shpSplit, context);
         }
         if(dbfSplit != null){
-            dbfFileReader = new DbfFileReader();
+            dbfFileReader = new DbfFileMetaReader();
             dbfFileReader.initialize(dbfSplit, context);
             hasDbf = true;
         }else hasDbf = false;
@@ -112,18 +116,19 @@ public class CombineShapeFileMetaIndexReader extends RecordReader<ShapeKey, Prim
 
     public boolean nextKeyValue() throws IOException, InterruptedException {
 
-        boolean hasNextShp = shapeFileReader.nextKeyValue();
+        boolean hasNextShp = shapeFileMetaReader.nextKeyValue();
         if(hasDbf) hasNextDbf = dbfFileReader.nextKeyValue();
-        int curShapeType = shapeFileReader.getCurrentValue().getTypeID();
+        int curShapeType = shapeFileMetaReader.getCurrentValue().getTypeID();
         while(curShapeType == ShapeType.UNDEFINED.getId()){
-            hasNextShp = shapeFileReader.nextKeyValue();
+            hasNextShp = shapeFileMetaReader.nextKeyValue();
             if(hasDbf) hasNextDbf = dbfFileReader.nextKeyValue();
-            curShapeType = shapeFileReader.getCurrentValue().getTypeID();
+            curShapeType = shapeFileMetaReader.getCurrentValue().getTypeID();
         }
         // check if records match in .shp and .dbf
         if(hasDbf){
             if(hasNextShp && !hasNextDbf){
-                Exception e = new Exception("shape record loses attributes in .dbf file at ID=" + shapeFileReader.getCurrentKey().getIndex());
+                Exception e = new Exception("shape record loses attributes in .dbf file at ID=" + shapeFileMetaReader
+                    .getCurrentKey().getIndex());
                 e.printStackTrace();
             }else if(!hasNextShp && hasNextDbf){
                 Exception e = new Exception("Redundant attributes in .dbf exists");
@@ -134,20 +139,21 @@ public class CombineShapeFileMetaIndexReader extends RecordReader<ShapeKey, Prim
     }
 
     public ShapeKey getCurrentKey() throws IOException, InterruptedException {
-        return shapeFileReader.getCurrentKey();
+        return shapeFileMetaReader.getCurrentKey();
     }
 
-    public PrimitiveShape getCurrentValue() throws IOException, InterruptedException {
-        PrimitiveShape value = new PrimitiveShape(shapeFileReader.getCurrentValue());
-        if(hasDbf && hasNextDbf) value.setAttributes(dbfFileReader.getCurrentValue());
-        return value;
+    public ShapeFileMeta getCurrentValue() throws IOException, InterruptedException {
+        ShpMeta shpMeta = shapeFileMetaReader.getCurrentValue();
+        DbfMeta dbfMeta = dbfFileReader.getCurrentValue();
+        String filePath = shpSplit.getPath().toString().replace("." + SHP_SUFFIX, "");
+        return new ShapeFileMeta(shpMeta, dbfMeta, filePath);
     }
 
     public float getProgress() throws IOException, InterruptedException {
-        return shapeFileReader.getProgress();
+        return shapeFileMetaReader.getProgress();
     }
 
     public void close() throws IOException {
-        shapeFileReader.close();
+        shapeFileMetaReader.close();
     }
 }

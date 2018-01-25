@@ -4,7 +4,7 @@
  * Copyright (c) 2015-2017 GeoSpark Development Team
  * All rights reserved.
  */
-package org.datasyslab.geospark.formatMapper.shapefileParser.shapes;
+package edu.gmu.stc.vector.shapefile.meta.index.reader;
 
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -13,25 +13,27 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.shp.ShpFileParser;
+import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Iterator;
 
-public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
+import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta;
+import edu.gmu.stc.vector.shapefile.meta.ShpMeta;
+import edu.gmu.stc.vector.shapefile.meta.index.parser.ShpFileMetaParser;
+
+public class ShapeFileMetaReader extends RecordReader<ShapeKey, ShpMeta> {
 
     /** record id */
     private ShapeKey recordKey = null;
 
     /** primitive bytes value */
-    private ShpRecord recordContent = null;
+    private ShpMeta shpMeta = null;
 
     /** inputstream for .shp file */
     private FSDataInputStream shpInputStream = null;
 
-    /** file parser */
-    ShpFileParser parser = null;
+    /** file shpParser */
+    ShpFileMetaParser shpParser = null;
 
     /** Iterator of indexes of records */
     private int[] indexes;
@@ -45,14 +47,14 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
     /**
      * empty constructor
      */
-    public ShapeFileReader() {
+    public ShapeFileMetaReader() {
     }
 
     /**
      * constructor with index
      * @param indexes
      */
-    public ShapeFileReader(int[] indexes) {
+    public ShapeFileMetaReader(int[] indexes) {
         this.indexes = indexes;
         useIndex = true;
     }
@@ -62,12 +64,10 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
         Path filePath = fileSplit.getPath();
         FileSystem fileSys = filePath.getFileSystem(context.getConfiguration());
         shpInputStream = fileSys.open(filePath);
-        //assign inputstream to parser and parse file header to init;
-        parser = new ShpFileParser(shpInputStream);
-        parser.parseShapeFileHead();
+        //assign inputstream to shpParser and parse file header to init;
+      shpParser = new ShpFileMetaParser(shpInputStream);
+        shpParser.parseShapeFileHead();
     }
-
-
 
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if(useIndex){
@@ -81,15 +81,16 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
             }
             int currentLength = indexes[indexId + 1] * 2 - 4;
             recordKey = new ShapeKey();
-            recordKey.setIndex(parser.parseRecordHeadID());
-            recordContent = parser.parseRecordPrimitiveContent(currentLength);
+            recordKey.setIndex(shpParser.parseRecordHeadID());
+            shpMeta = shpParser.parseRecordPrimitiveContent(currentLength);
+            shpMeta.setIndex(recordKey.getIndex());
             indexId += 2;
             return true;
         }else{
             if(getProgress() >= 1) return false;
             recordKey = new ShapeKey();
-            recordKey.setIndex(parser.parseRecordHeadID());
-            recordContent = parser.parseRecordPrimitiveContent();
+            recordKey.setIndex(shpParser.parseRecordHeadID());
+            shpMeta = shpParser.parseRecordPrimitiveContent();
             return true;
         }
     }
@@ -98,12 +99,12 @@ public class ShapeFileReader extends RecordReader<ShapeKey, ShpRecord> {
         return recordKey;
     }
 
-    public ShpRecord getCurrentValue() throws IOException, InterruptedException {
-        return recordContent;
+    public ShpMeta getCurrentValue() throws IOException, InterruptedException {
+        return shpMeta;
     }
 
     public float getProgress() throws IOException, InterruptedException {
-        return parser.getProgress();
+        return shpParser.getProgress();
     }
 
     public void close() throws IOException {
