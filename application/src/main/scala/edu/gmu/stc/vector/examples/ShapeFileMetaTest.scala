@@ -15,7 +15,9 @@ object ShapeFileMetaTest extends App {
   hConf.set("mapred.input.dir", "/Users/feihu/Documents/GitHub/GeoSpark/application/src/main/resources/data/Washington_DC/Impervious_Surface_2015_DC")
 
   val shapeFileMetaRDD = new ShapeFileMetaRDD(sc, hConf)
-  shapeFileMetaRDD.foreach( element => {
-    println(element._2.toString)
+  shapeFileMetaRDD.shapeFileMetaRDD.foreach( element => {
+    println(element.toString)
   })
+
+  shapeFileMetaRDD.toDatabase("shapefileMeta_DC")
 }

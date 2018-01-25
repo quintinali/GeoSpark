@@ -5,4 +5,10 @@ package edu.gmu.stc.vector.shapefile.meta;
  */
 public class TestShapeFileMeta {
 
+  public static void main(String[] args) {
+    System.out.println(ShapeFileMeta.getSQLForOverlappedRows("shapeFile",
+                                                             -100.0, -100.0,
+                                                             100.0, 100.0));
+  }
+
 }
