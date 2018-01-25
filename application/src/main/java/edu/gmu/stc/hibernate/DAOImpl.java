@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Query;
@@ -140,26 +141,6 @@ public class DAOImpl<T> implements DAO {
         return objects;
     }
 
-    public void createTableFromAnother(String newTableName, String templateTableName) {
-      if(!isSetup()) {
-        System.exit(-1);
-      }
-
-      try {
-        session.beginTransaction();
-        String createTableFromTemplateSQL = String.format("CREATE TABLE %s AS (SELECT * FROM %s WHERE 1=2)",
-                                                       newTableName,
-                                                       templateTableName);
-        LOG.info("Create Table From Template : " + createTableFromTemplateSQL);
-        session.createSQLQuery(createTableFromTemplateSQL).executeUpdate();
-        session.close();
-      } catch(Exception e) {
-        LOG.error("Unable to create table: " + e);
-        e.printStackTrace();
-        session.getTransaction().rollback();
-      }
-    }
-
     public void insertList(List list) {
         if(!isSetup()) {
             System.exit(-1);
@@ -213,14 +194,15 @@ public class DAOImpl<T> implements DAO {
      * @param tableName  the table name
      * @param objectList the object list
      */
-    public void insertDynamicTableObjectList(String tableName, List<Object> objectList) {
+    public void insertDynamicTableObjectList(String tableName, Iterator<T> objectList) {
       if(!isSetup()) {
         System.exit(-1);
       }
       try {
         session.beginTransaction();
-        for (Object object : objectList) {
-          session.save(tableName, object);
+
+        while (objectList.hasNext()) {
+          session.save(tableName, objectList.next());
         }
         session.getTransaction().commit();
       } catch(Exception e) {
