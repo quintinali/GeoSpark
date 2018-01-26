@@ -21,14 +21,13 @@ import scala.collection.JavaConverters._
   * Created by Fei Hu on 1/24/18.
   */
 
-class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
-  //private var shapeFileMetaList: List[ShapeFileMeta] = _
+class ShapeFileMetaRDD extends Serializable {
 
   private var shapeFileMetaRDD: RDD[ShapeFileMeta] = _
 
   private var partitioner: SpatialPartitioner = _
 
-  def initializeShapeFileMetaRDD(): Unit = {
+  def initializeShapeFileMetaRDD(sc: SparkContext, conf: Configuration): Unit = {
     shapeFileMetaRDD = new NewHadoopRDD[ShapeKey, ShapeFileMeta](sc,
       classOf[ShapeFileMetaIndexInputFormat].asInstanceOf[Class[F] forSome {type F <: InputFormat[ShapeKey, ShapeFileMeta]}],
       classOf[org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey],
@@ -36,7 +35,7 @@ class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
       conf).map( element => element._2)
   }
 
-  def initializeShapeFileMetaRDD(tableName: String, partitionNum: Int, minX: Double, minY: Double,
+  def initializeShapeFileMetaRDD(sc: SparkContext, tableName: String, partitionNum: Int, minX: Double, minY: Double,
                                   maxX: Double, maxY: Double): Unit = {
     val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
     val session = HibernateUtil
@@ -52,7 +51,7 @@ class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
 
     partitioner = PartitionUtil.spatialPartitioning(GridType.RTREE, partitionNum, shapeFileMetaList.asJava)
 
-    shapeFileMetaRDD = sc.parallelize(shapeFileMetaList)
+    shapeFileMetaRDD = sc.parallelize(shapeFileMetaList, partitionNum)
       .flatMap(shapefileMeta => partitioner.placeObject(shapefileMeta).asScala)
       .partitionBy(partitioner).map( tuple => tuple._2)
   }
@@ -70,10 +69,6 @@ class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
       session.close()
     })
   }
-
-
-
-  //def getShapeFileMetaList: List[ShapeFileMeta] = this.shapeFileMetaList
 
   def getShapeFileMetaRDD: RDD[ShapeFileMeta] = this.shapeFileMetaRDD
 }

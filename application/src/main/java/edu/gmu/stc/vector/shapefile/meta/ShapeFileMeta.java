@@ -1,5 +1,8 @@
 package edu.gmu.stc.vector.shapefile.meta;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.vividsolutions.jts.geom.Envelope;
 
 import org.apache.commons.logging.Log;
@@ -169,6 +172,32 @@ public class ShapeFileMeta implements Serializable {
     this.maxY = maxY;
   }
 
+  public void write(Kryo kryo, Output out) {
+    out.writeLong(this.index);
+    out.writeInt(this.typeID);
+    out.writeLong(this.shp_offset);
+    out.writeInt(this.shp_length);
+    out.writeLong(this.dbf_offset);
+    out.writeInt(this.dbf_length);
+    out.writeDouble(this.minX);
+    out.writeDouble(this.minY);
+    out.writeDouble(this.maxX);
+    out.writeDouble(this.maxY);
+  }
+
+  public void read(Kryo kryo, Input input) {
+    this.index = input.readLong();
+    this.typeID = input.readInt();
+    this.shp_offset = input.readLong();
+    this.shp_length = input.readInt();
+    this.dbf_offset = input.readLong();
+    this.dbf_length = input.readInt();
+    this.minX = input.readDouble();
+    this.minY = input.readDouble();
+    this.maxX = input.readDouble();
+    this.maxY = input.readDouble();
+  }
+
   public String toString() {
     return String.format("Index: %d; TypeID: %d\n"
                          + "\t shp_offset: %d, shp_length: %d; \n "
@@ -193,4 +222,6 @@ public class ShapeFileMeta implements Serializable {
     }
     return this.envelope;
   }
+
+
 }
