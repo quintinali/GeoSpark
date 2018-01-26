@@ -31,5 +31,5 @@ object ShapeFileMetaTest extends App {
   val maxY = 38.9956105073279
   shapeFileMetaRDD.initializeShapeFileMetaList(tableName, minX, minY, maxX, maxY)
 
-  println("**********", shapeFileMetaRDD.getShapeFileMetaList.size)
+  println("***********", shapeFileMetaRDD.getShapeFileMetaList.size)
 }
