@@ -12,6 +12,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta;
+
 /**
  * The type Dao.
  *
@@ -101,45 +103,26 @@ public class DAOImpl<T> implements DAO {
         return objects;
     }
 
-    /** Valid hibernate criteria builder queries
-     * .equal      - test equality of two expressions
-     * .notEqual   - test inequality of two expressions
-     * .gt         - test first expression greater than second
-     * .ge         - test first expression greater than or equal to second
-     * .lt         - test first expression less than second
-     * .le         - test first expression less than or equal to second
-     * .between    - test first expression between second and third
-     * .like       - test expression matches a given pattern
-     *
-     * Predicates for criteria builder
-     * .and        - logical conjunction of two boolean expressions (see above list)
-     * .or         - logical disjunction of two boolean expressions (see above list)
-     * .not        - logical negation of a boolean expression (see above list)
-     *
-     * Example
-     * criteriaQuery.where(criteriaBuilder.and(criteriaBuilder.gt(balance, 100),
-     *                                         criteriaBuilder.lt(balance, 200)));
-     */
-    public List<T> findByQuery(String hqlQuery) {
-        if(!isSetup()) {
-            System.exit(-1);
-        }
+    @Override
+    public List<T> findByQuery(String hqlQuery, Class cls) {
+      if(!isSetup()) {
+        System.exit(-1);
+      }
 
-        List<T> objects = null;
+      List<T> objects = null;
 
-        try {
-            session.beginTransaction();
-            Query query = session.createQuery(hqlQuery);
-            objects = query.getResultList();
-            session.close();
-        } catch(Exception e) {
-            System.err.println("Error when attempting to retrieve data via query: " + e);
-            e.printStackTrace();
-            session.getTransaction().rollback();
-        }
+      try {
+        session.beginTransaction();
+        objects = session.createSQLQuery("SELECT * " + hqlQuery).addEntity(cls).list();
+      } catch(Exception e) {
+        System.err.println("Error when attempting to retrieve data via query: " + e);
+        e.printStackTrace();
+        session.getTransaction().rollback();
+      }
 
-        return objects;
+      return objects;
     }
+
 
     public void insertList(List list) {
         if(!isSetup()) {

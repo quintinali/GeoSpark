@@ -7,8 +7,8 @@ public class TestShapeFileMeta {
 
   public static void main(String[] args) {
     System.out.println(ShapeFileMeta.getSQLForOverlappedRows("shapeFile",
-                                                             -100.0, -100.0,
-                                                             100.0, 100.0));
+                                                             -77.0411709654385, 38.9956105073279,
+                                                             -77.0413824515586, 38.9954578167531));
   }
 
 }
