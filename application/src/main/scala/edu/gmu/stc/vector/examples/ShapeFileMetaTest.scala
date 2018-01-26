@@ -21,15 +21,16 @@ object ShapeFileMetaTest extends App {
   shapeFileMetaRDD.initializeShapeFileMetaRDD()
   shapeFileMetaRDD.saveShapeFileMetaToDB(tableName)
 
-  shapeFileMetaRDD.getShapeFileMetaRDD.foreach( element => {
+  /*shapeFileMetaRDD.getShapeFileMetaRDD.foreach( element => {
     println(element.toString)
-  })
+  })*/
 
-  val minX = -77.0413824515586
-  val minY = 38.9954578167531
-  val maxX = -77.0411709654385
-  val maxY = 38.9956105073279
-  shapeFileMetaRDD.initializeShapeFileMetaList(tableName, minX, minY, maxX, maxY)
+  val minX = -180
+  val minY = -180
+  val maxX = 180
+  val maxY = 180
+  val paritionNum = 10
+  shapeFileMetaRDD.initializeShapeFileMetaRDD(tableName, paritionNum, minX, minY, maxX, maxY)
 
-  println("***********", shapeFileMetaRDD.getShapeFileMetaList.size)
+  println("***********", shapeFileMetaRDD.getShapeFileMetaRDD.partitions.size)
 }

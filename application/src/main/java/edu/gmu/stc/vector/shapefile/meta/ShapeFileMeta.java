@@ -1,5 +1,7 @@
 package edu.gmu.stc.vector.shapefile.meta;
 
+import com.vividsolutions.jts.geom.Envelope;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -38,6 +40,8 @@ public class ShapeFileMeta implements Serializable {
   private double maxY;
   @Column(name = "filepath")
   private String filePath;
+
+  private Envelope envelope = null;
 
   public ShapeFileMeta() {
 
@@ -181,5 +185,12 @@ public class ShapeFileMeta implements Serializable {
                                String.valueOf(maxY), String.valueOf(minY)).toLowerCase();
     LOG.info("SQL for querying overlapped rows: " + sql);
     return sql;
+  }
+
+  public Envelope getEnvelopeInternal() {
+    if (this.envelope == null) {
+      this.envelope = new Envelope(minX, maxX, minY, maxY);
+    }
+    return this.envelope;
   }
 }

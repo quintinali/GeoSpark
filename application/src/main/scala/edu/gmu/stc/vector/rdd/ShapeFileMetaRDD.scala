@@ -1,6 +1,7 @@
 package edu.gmu.stc.vector.rdd
 
 import edu.gmu.stc.hibernate.{DAOImpl, HibernateUtil, PhysicalNameStrategyImpl}
+import edu.gmu.stc.vector.parition.{PartitionUtil, SpatialPartitioner}
 import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta
 import edu.gmu.stc.vector.shapefile.meta.index.ShapeFileMetaIndexInputFormat
 import org.apache.spark.{Partition, SparkContext, TaskContext}
@@ -9,6 +10,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.spark.rdd.NewHadoopRDD
 import org.apache.hadoop.mapreduce.InputFormat
 import org.apache.spark.internal.Logging
+import org.datasyslab.geospark.enums.GridType
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey
 import org.hibernate.Session
 
@@ -20,9 +22,11 @@ import scala.collection.JavaConverters._
   */
 
 class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
-  private var shapeFileMetaList: List[ShapeFileMeta] = _
+  //private var shapeFileMetaList: List[ShapeFileMeta] = _
 
   private var shapeFileMetaRDD: RDD[ShapeFileMeta] = _
+
+  private var partitioner: SpatialPartitioner = _
 
   def initializeShapeFileMetaRDD(): Unit = {
     shapeFileMetaRDD = new NewHadoopRDD[ShapeKey, ShapeFileMeta](sc,
@@ -32,7 +36,7 @@ class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
       conf).map( element => element._2)
   }
 
-  def initializeShapeFileMetaList(tableName: String, minX: Double, minY: Double,
+  def initializeShapeFileMetaRDD(tableName: String, partitionNum: Int, minX: Double, minY: Double,
                                   maxX: Double, maxY: Double): Unit = {
     val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
     val session = HibernateUtil
@@ -42,8 +46,15 @@ class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
     val dao = new DAOImpl[ShapeFileMeta]()
     dao.setSession(session)
     val hql = ShapeFileMeta.getSQLForOverlappedRows(tableName, minX, minY, maxX, maxY)
-    shapeFileMetaList = dao.findByQuery(hql, classOf[ShapeFileMeta]).asScala.toList
+
+    val shapeFileMetaList = dao.findByQuery(hql, classOf[ShapeFileMeta]).asScala.toList
     session.close()
+
+    partitioner = PartitionUtil.spatialPartitioning(GridType.RTREE, partitionNum, shapeFileMetaList.asJava)
+
+    shapeFileMetaRDD = sc.parallelize(shapeFileMetaList)
+      .flatMap(shapefileMeta => partitioner.placeObject(shapefileMeta).asScala)
+      .partitionBy(partitioner).map( tuple => tuple._2)
   }
 
   def saveShapeFileMetaToDB(tableName: String): Unit = {
@@ -60,7 +71,9 @@ class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
     })
   }
 
-  def getShapeFileMetaList: List[ShapeFileMeta] = this.shapeFileMetaList
+
+
+  //def getShapeFileMetaList: List[ShapeFileMeta] = this.shapeFileMetaList
 
   def getShapeFileMetaRDD: RDD[ShapeFileMeta] = this.shapeFileMetaRDD
 }
