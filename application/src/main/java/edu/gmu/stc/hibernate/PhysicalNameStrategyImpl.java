@@ -26,8 +26,7 @@ public class PhysicalNameStrategyImpl implements PhysicalNamingStrategy {
 
   @Override
   public Identifier toPhysicalTableName(Identifier name, JdbcEnvironment jdbcEnvironment) {
-    Identifier identifier = new Identifier(this.tableName, false);
-    return identifier;
+    return new Identifier(this.tableName, false);
   }
 
   @Override

@@ -51,7 +51,7 @@ public interface DAO<T> {
      * @param hqlQuery the hql query
      * @return the list
      */
-    List<T> findByQuery(String hqlQuery);
+    List<T> findByQuery(String hqlQuery, Class<T> cls);
 
     /**
      * Insert list.

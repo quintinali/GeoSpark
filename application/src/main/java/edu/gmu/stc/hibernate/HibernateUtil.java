@@ -10,6 +10,7 @@ import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Environment;
+import org.hibernate.jpa.event.internal.jpa.EntityCallback;
 
 import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta;
 import edu.gmu.stc.vector.shapefile.meta.ShpMeta;
@@ -90,6 +91,7 @@ public class HibernateUtil {
     try {
       MetadataSources sources = new MetadataSources(registry);
       sources.addAnnotatedClass(mappingClass);
+      //sources.addClass(mappingClass);
       MetadataBuilder metadataBuilder = sources.getMetadataBuilder();
 
       metadataBuilder.applyPhysicalNamingStrategy(physicalNameStrategy);

@@ -18,7 +18,7 @@ public class ShapeFileMeta implements Serializable {
 
   @Id
   private Long index;
-  @Column(name = "typeID")
+  @Column(name = "typeid")
   private int typeID;
   @Column(name = "shp_offset")
   private long shp_offset;
@@ -28,16 +28,20 @@ public class ShapeFileMeta implements Serializable {
   private long dbf_offset;
   @Column(name = "dbf_length")
   private int dbf_length;
-  @Column(name = "minX")
+  @Column(name = "minx")
   private double minX;
-  @Column(name = "minY")
+  @Column(name = "miny")
   private double minY;
-  @Column(name = "maxX")
+  @Column(name = "maxx")
   private double maxX;
-  @Column(name = "maxY")
+  @Column(name = "maxy")
   private double maxY;
-  @Column(name = "filePath")
+  @Column(name = "filepath")
   private String filePath;
+
+  public ShapeFileMeta() {
+
+  }
 
   public ShapeFileMeta(Long index, int typeID, long shp_offset, int shp_length, long dbf_offset,
                        int dbf_length, String filePath, double minX, double minY, double maxX,
@@ -171,8 +175,10 @@ public class ShapeFileMeta implements Serializable {
 
   public static String getSQLForOverlappedRows(String tableName, double minX, double minY, double maxX, double maxY) {
 
-    String sql = String.format("FROM %s WHERE (%f < minX OR %f > maxX OR %f < minY OR %f > maxY) = FALSE",
-                               tableName, maxX, minX, maxY, minY).toLowerCase();
+    String sql = String.format("FROM %s WHERE (%s < minX OR %s > maxX OR %s < minY OR %s > maxY) = FALSE",
+                               tableName,
+                               String.valueOf(maxX), String.valueOf(minX),
+                               String.valueOf(maxY), String.valueOf(minY)).toLowerCase();
     LOG.info("SQL for querying overlapped rows: " + sql);
     return sql;
   }

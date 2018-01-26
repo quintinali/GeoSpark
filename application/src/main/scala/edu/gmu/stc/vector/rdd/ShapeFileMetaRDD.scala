@@ -18,25 +18,35 @@ import scala.collection.JavaConverters._
 /**
   * Created by Fei Hu on 1/24/18.
   */
-/*class ShapeFileMetaRDD (sc: SparkContext, @transient conf: Configuration)
-  extends NewHadoopRDD(sc,
-    classOf[ShapeFileMetaIndexInputFormat].asInstanceOf[Class[F] forSome {type F <: InputFormat[ShapeKey, ShapeFileMeta]}],
-    classOf[org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey],
-    classOf[edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta],
-    conf){
-
-}*/
-
 
 class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
+  private var shapeFileMetaList: List[ShapeFileMeta] = _
 
-  val shapeFileMetaRDD: RDD[ShapeFileMeta] = new NewHadoopRDD[ShapeKey, ShapeFileMeta](sc,
-    classOf[ShapeFileMetaIndexInputFormat].asInstanceOf[Class[F] forSome {type F <: InputFormat[ShapeKey, ShapeFileMeta]}],
-    classOf[org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey],
-    classOf[edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta],
-    conf).map( element => element._2)
+  private var shapeFileMetaRDD: RDD[ShapeFileMeta] = _
 
-  def toDatabase(tableName: String): Unit = {
+  def initializeShapeFileMetaRDD(): Unit = {
+    shapeFileMetaRDD = new NewHadoopRDD[ShapeKey, ShapeFileMeta](sc,
+      classOf[ShapeFileMetaIndexInputFormat].asInstanceOf[Class[F] forSome {type F <: InputFormat[ShapeKey, ShapeFileMeta]}],
+      classOf[org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShapeKey],
+      classOf[edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta],
+      conf).map( element => element._2)
+  }
+
+  def initializeShapeFileMetaList(tableName: String, minX: Double, minY: Double,
+                                  maxX: Double, maxY: Double): Unit = {
+    val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
+    val session = HibernateUtil
+      .createSessionFactoryWithPhysicalNamingStrategy(physicalNameStrategy,
+        classOf[ShapeFileMeta])
+      .openSession
+    val dao = new DAOImpl[ShapeFileMeta]()
+    dao.setSession(session)
+    val hql = ShapeFileMeta.getSQLForOverlappedRows(tableName, minX, minY, maxX, maxY)
+    shapeFileMetaList = dao.findByQuery(hql, classOf[ShapeFileMeta]).asScala.toList
+    session.close()
+  }
+
+  def saveShapeFileMetaToDB(tableName: String): Unit = {
     shapeFileMetaRDD.foreachPartition(itor => {
       val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
       val session = HibernateUtil
@@ -48,6 +58,9 @@ class ShapeFileMetaRDD (sc: SparkContext, conf: Configuration) {
       dao.insertDynamicTableObjectList(tableName, itor.asJava)
       session.close()
     })
-
   }
+
+  def getShapeFileMetaList: List[ShapeFileMeta] = this.shapeFileMetaList
+
+  def getShapeFileMetaRDD: RDD[ShapeFileMeta] = this.shapeFileMetaRDD
 }

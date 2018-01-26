@@ -15,9 +15,21 @@ object ShapeFileMetaTest extends App {
   hConf.set("mapred.input.dir", "/Users/feihu/Documents/GitHub/GeoSpark/application/src/main/resources/data/Washington_DC/Impervious_Surface_2015_DC")
 
   val shapeFileMetaRDD = new ShapeFileMetaRDD(sc, hConf)
-  shapeFileMetaRDD.shapeFileMetaRDD.foreach( element => {
+
+  val tableName = "test_123"
+
+  shapeFileMetaRDD.initializeShapeFileMetaRDD()
+  shapeFileMetaRDD.saveShapeFileMetaToDB(tableName)
+
+  shapeFileMetaRDD.getShapeFileMetaRDD.foreach( element => {
     println(element.toString)
   })
 
-  shapeFileMetaRDD.toDatabase("shapefileMeta_DC")
+  val minX = -77.0413824515586
+  val minY = 38.9954578167531
+  val maxX = -77.0411709654385
+  val maxY = 38.9956105073279
+  shapeFileMetaRDD.initializeShapeFileMetaList(tableName, minX, minY, maxX, maxY)
+
+  println("**********", shapeFileMetaRDD.getShapeFileMetaList.size)
 }
