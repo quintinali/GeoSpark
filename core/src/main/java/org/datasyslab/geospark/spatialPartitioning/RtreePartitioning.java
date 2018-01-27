@@ -32,7 +32,7 @@ public class RtreePartitioning implements Serializable{
 	 */
 	public RtreePartitioning(List<Envelope> samples, int partitions) throws Exception
 	{
-		STRtree strtree=new STRtree(samples.size()/partitions);
+		STRtree strtree = new STRtree(samples.size()/partitions);
 		for (Envelope sample : samples) {
 			strtree.insert(sample, sample);
     	        }
@@ -42,7 +42,7 @@ public class RtreePartitioning implements Serializable{
 		  grids.add(envelope);
                 }
 	}
-	
+
 	/**
 	 * Gets the grids.
 	 *
