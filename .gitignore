@@ -8,7 +8,6 @@
 /bin/
 /doc/
 /config/
-config/
 /log/
 *.json
 *.geojson
