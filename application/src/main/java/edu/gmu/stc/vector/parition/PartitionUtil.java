@@ -7,7 +7,6 @@ import org.datasyslab.geospark.spatialPartitioning.EqualPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.HilbertPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.KDBTree;
 import org.datasyslab.geospark.spatialPartitioning.KDBTreePartitioner;
-import org.datasyslab.geospark.spatialPartitioning.QuadtreePartitioning;
 import org.datasyslab.geospark.spatialPartitioning.VoronoiPartitioning;
 import org.datasyslab.geospark.spatialPartitioning.quadtree.QuadTreePartitioner;
 import org.datasyslab.geospark.spatialPartitioning.quadtree.StandardQuadTree;
@@ -63,6 +62,7 @@ public class PartitionUtil {
         partitioner = new FlatGridPartitioner(grids);
         break;
       }
+
       default:
         throw new Exception("[AbstractSpatialRDD][spatialPartitioning] Unsupported spatial partitioning method.");
     }

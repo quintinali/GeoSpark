@@ -119,7 +119,7 @@ public class DbfMetaParser implements ShapeFileConst {
             flag = inputStream.readByte();
         }
         if(flag == FILE_END_FLAG) return null;
-        byte[] primitiveBytes = new byte[recordLength];
+        //byte[] primitiveBytes = new byte[recordLength];
         DbfMeta dbfMeta = new DbfMeta(numRecordRead, inputStream.getPos(), recordLength);
         //inputStream.readFully(primitiveBytes);
         inputStream.skipBytes(recordLength);

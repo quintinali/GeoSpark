@@ -190,6 +190,10 @@ public class DbfParseUtil implements ShapeFileConst {
         return new String(chars);
     }
 
+    public List<FieldDescriptor> getFieldDescriptors() {
+      return this.fieldDescriptors;
+    }
+
 
 
 }

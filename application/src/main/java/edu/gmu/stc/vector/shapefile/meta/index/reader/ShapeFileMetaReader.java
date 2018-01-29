@@ -64,8 +64,9 @@ public class ShapeFileMetaReader extends RecordReader<ShapeKey, ShpMeta> {
         Path filePath = fileSplit.getPath();
         FileSystem fileSys = filePath.getFileSystem(context.getConfiguration());
         shpInputStream = fileSys.open(filePath);
+
         //assign inputstream to shpParser and parse file header to init;
-      shpParser = new ShpFileMetaParser(shpInputStream);
+        shpParser = new ShpFileMetaParser(shpInputStream);
         shpParser.parseShapeFileHead();
     }
 

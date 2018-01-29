@@ -7,8 +7,16 @@
 package edu.gmu.stc.vector.parition;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.index.strtree.STRtree;
 
+import org.apache.commons.io.FileUtils;
+import org.wololo.jts2geojson.GeoJSONWriter;
+import org.wololo.geojson.Feature;
+import org.wololo.geojson.FeatureCollection;
+
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +51,8 @@ public class RtreePartitioning implements Serializable{
           for (Envelope envelope : envelopes) {
             grids.add(envelope);
           }
+
+          saveGridAsGeoJSON("/Users/feihu/Documents/GitHub/GeoSpark/" + samples.size() + ".geojson");
         }
 
 	/**
@@ -55,4 +65,16 @@ public class RtreePartitioning implements Serializable{
 		return this.grids;
 		
 	}
+
+	public void saveGridAsGeoJSON(String filePath) throws IOException {
+          GeoJSONWriter writer = new GeoJSONWriter();
+          List<Feature> featureList = new ArrayList<Feature>();
+          GeometryFactory geometryFactory = new GeometryFactory();
+          for (Envelope envelope : grids) {
+            featureList.add(new Feature(writer.write(geometryFactory.toGeometry(envelope)), null));
+          }
+
+          FeatureCollection featureCollection = new FeatureCollection(featureList.toArray(new Feature[featureList.size()]));
+          FileUtils.writeStringToFile(new File(filePath), featureCollection.toString());
+        }
 }
