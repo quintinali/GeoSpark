@@ -41,11 +41,13 @@ class ShapeFileMetaRDD extends Serializable with Logging {
       conf).map( element => element._2)
   }
 
-  def initializeShapeFileMetaRDD(sc: SparkContext, tableName: String, partitionNum: Int, minX: Double, minY: Double,
-                                  maxX: Double, maxY: Double): Unit = {
+  def initializeShapeFileMetaRDD(sc: SparkContext,
+                                 tableName: String,
+                                 partitionNum: Int, minX: Double, minY: Double,
+                                 maxX: Double, maxY: Double): Unit = {
     val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
     val session = HibernateUtil
-      .createSessionFactoryWithPhysicalNamingStrategy(physicalNameStrategy,
+      .createSessionFactoryWithPhysicalNamingStrategy(sc.hadoopConfiguration, physicalNameStrategy,
         classOf[ShapeFileMeta])
       .openSession
     val dao = new DAOImpl[ShapeFileMeta]()
@@ -69,11 +71,12 @@ class ShapeFileMetaRDD extends Serializable with Logging {
       .map(tuple => tuple._2)*/
   }
 
-  def initializeShapeFileMetaRDD(sc: SparkContext, partitioner: SpatialPartitioner, tableName: String, partitionNum: Int, minX: Double, minY: Double,
-                maxX: Double, maxY: Double) = {
+  def initializeShapeFileMetaRDD(sc: SparkContext, partitioner: SpatialPartitioner,
+                                 tableName: String, partitionNum: Int,
+                                 minX: Double, minY: Double, maxX: Double, maxY: Double) = {
     val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
     val session = HibernateUtil
-      .createSessionFactoryWithPhysicalNamingStrategy(physicalNameStrategy,
+      .createSessionFactoryWithPhysicalNamingStrategy(sc.hadoopConfiguration, physicalNameStrategy,
         classOf[ShapeFileMeta])
       .openSession
     val dao = new DAOImpl[ShapeFileMeta]()
@@ -94,11 +97,11 @@ class ShapeFileMetaRDD extends Serializable with Logging {
       .map(tuple => tuple._2)*/
   }
 
-  def saveShapeFileMetaToDB(tableName: String): Unit = {
+  def saveShapeFileMetaToDB(conf: Configuration, tableName: String): Unit = {
     shapeFileMetaRDD.foreachPartition(itor => {
       val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
       val session = HibernateUtil
-        .createSessionFactoryWithPhysicalNamingStrategy(physicalNameStrategy,
+        .createSessionFactoryWithPhysicalNamingStrategy(conf, physicalNameStrategy,
                                                         classOf[ShapeFileMeta])
         .openSession
       val dao = new DAOImpl[ShapeFileMeta]()

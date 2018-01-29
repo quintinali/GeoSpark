@@ -1,6 +1,8 @@
 package edu.gmu.stc.hibernate;
 
+import org.apache.hadoop.fs.Path;
 import org.hibernate.Session;
+import org.apache.hadoop.conf.Configuration;
 
 import javax.print.Doc;
 
@@ -13,9 +15,11 @@ public class TestHibernate {
 
   public static void main(String[] args) {
     String tableName = "table_shp";
+    Configuration configuration = new Configuration();
+    configuration.addResource(new Path("/Users/feihu/Documents/GitHub/GeoSpark/conf/conf.xml"));
     PhysicalNameStrategyImpl physicalNameStrategy = new PhysicalNameStrategyImpl(tableName);
     Session session = HibernateUtil
-        .createSessionFactoryWithPhysicalNamingStrategy(physicalNameStrategy, ShapeFileMeta.class)
+        .createSessionFactoryWithPhysicalNamingStrategy(configuration, physicalNameStrategy, ShapeFileMeta.class)
         .openSession();
     DAOImpl dao = new DAOImpl();
     dao.setSession(session);

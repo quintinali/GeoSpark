@@ -3,6 +3,7 @@ package edu.gmu.stc.hibernate;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataBuilder;
@@ -12,6 +13,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Environment;
 import org.hibernate.jpa.event.internal.jpa.EntityCallback;
 
+import edu.gmu.stc.config.ConfigParameter;
 import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta;
 import edu.gmu.stc.vector.shapefile.meta.ShpMeta;
 
@@ -23,7 +25,7 @@ public class HibernateUtil {
   private static StandardServiceRegistry registry;
   private static SessionFactory sessionFactory;
 
-  public static SessionFactory getSessionFactory() {
+  public static SessionFactory getSessionFactory(Configuration conf) {
     if (sessionFactory == null) {
       try {
 
@@ -32,12 +34,12 @@ public class HibernateUtil {
 
         // Hibernate settings equivalent to hibernate.cfg.xml's properties
         Map<String, String> settings = new HashMap<>();
-        settings.put(Environment.DRIVER, "org.postgresql.Driver");
-        settings.put(Environment.URL, "jdbc:postgresql://localhost:5432/hibernate_test");
-        settings.put(Environment.USER, "feihu");
-        settings.put(Environment.PASS, "feihu");
-        settings.put(Environment.DIALECT, "org.hibernate.dialect.PostgreSQL9Dialect");
-        settings.put(Environment.HBM2DDL_AUTO, "create");
+        settings.put(Environment.DRIVER, conf.get(ConfigParameter.HIBERNATE_DRIEVER));
+        settings.put(Environment.URL, conf.get(ConfigParameter.HIBERNATE_URL));
+        settings.put(Environment.USER, conf.get(ConfigParameter.HIBERNATE_USER));
+        settings.put(Environment.PASS, conf.get(ConfigParameter.HIBERNATE_PASS));
+        settings.put(Environment.DIALECT, conf.get(ConfigParameter.HIBERNATE_DIALECT));
+        settings.put(Environment.HBM2DDL_AUTO, conf.get(ConfigParameter.HIBERNATE_HBM2DDL_AUTO));
 
         // Apply settings
         registryBuilder.applySettings(settings);
@@ -67,7 +69,7 @@ public class HibernateUtil {
     return sessionFactory;
   }
 
-  public static <T> SessionFactory createSessionFactoryWithPhysicalNamingStrategy(
+  public static <T> SessionFactory createSessionFactoryWithPhysicalNamingStrategy(Configuration conf,
       PhysicalNameStrategyImpl physicalNameStrategy,
       Class<T> mappingClass) {
     // Create registry builder
@@ -75,12 +77,12 @@ public class HibernateUtil {
 
     // Hibernate settings equivalent to hibernate.cfg.xml's properties
     Map<String, String> settings = new HashMap<>();
-    settings.put(Environment.DRIVER, "org.postgresql.Driver");
-    settings.put(Environment.URL, "jdbc:postgresql://localhost:5432/hibernate_test");
-    settings.put(Environment.USER, "feihu");
-    settings.put(Environment.PASS, "feihu");
-    settings.put(Environment.DIALECT, "org.hibernate.dialect.PostgreSQL9Dialect");
-    settings.put(Environment.HBM2DDL_AUTO, "update");
+    settings.put(Environment.DRIVER, conf.get(ConfigParameter.HIBERNATE_DRIEVER));
+    settings.put(Environment.URL, conf.get(ConfigParameter.HIBERNATE_URL));
+    settings.put(Environment.USER, conf.get(ConfigParameter.HIBERNATE_USER));
+    settings.put(Environment.PASS, conf.get(ConfigParameter.HIBERNATE_PASS));
+    settings.put(Environment.DIALECT, conf.get(ConfigParameter.HIBERNATE_DIALECT));
+    settings.put(Environment.HBM2DDL_AUTO, conf.get(ConfigParameter.HIBERNATE_HBM2DDL_AUTO));
 
     // Apply settings
     registryBuilder.applySettings(settings);

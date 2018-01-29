@@ -3,6 +3,7 @@ package edu.gmu.stc.vector.examples
 import edu.gmu.stc.vector.rdd.{GeometryRDD, ShapeFileMetaRDD}
 import edu.gmu.stc.vector.serde.VectorKryoRegistrator
 import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
 import org.apache.spark.internal.Logging
 import org.apache.spark.{SparkConf, SparkContext}
 import org.datasyslab.geospark.enums.IndexType
@@ -17,8 +18,12 @@ object ShapeFileMetaTest extends App with Logging{
     .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     .set("spark.kryo.registrator", classOf[VectorKryoRegistrator].getName)
 
+  val confFilePath = "/Users/feihu/Documents/GitHub/GeoSpark/conf/conf.xml"
   val sc = new SparkContext(sparkConf)
   val hConf = new Configuration()
+  hConf.addResource(new Path(confFilePath))
+
+  sc.hadoopConfiguration.addResource(hConf)
 
   //val tableName = "Impervious_Surface_2015_DC".toLowerCase
   val tableName = "Soil_Type_by_Slope_DC".toLowerCase
