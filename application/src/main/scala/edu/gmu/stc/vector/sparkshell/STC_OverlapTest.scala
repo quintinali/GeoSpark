@@ -27,7 +27,7 @@ object STC_OverlapTest extends Logging{
       return
     }
 
-    val sparkConf = new SparkConf().setAppName(args(0)).setMaster("local[6]")
+    val sparkConf = new SparkConf().setAppName(args(0))//.setMaster("local[6]")
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", classOf[VectorKryoRegistrator].getName)
 
