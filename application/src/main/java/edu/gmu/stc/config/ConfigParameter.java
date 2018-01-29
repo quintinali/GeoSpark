@@ -15,5 +15,6 @@ public class ConfigParameter {
 
   //HDFS
   public static final String INPUT_DIR_PATH = "mapred.input.dir";
+  public static final String SHAPEFILE_INDEX_TABLES = "shapefile.index.tablenames";
 
 }

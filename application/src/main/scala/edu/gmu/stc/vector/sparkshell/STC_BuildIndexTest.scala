@@ -19,18 +19,13 @@ import org.apache.hadoop.conf.Configuration
 object STC_BuildIndexTest extends Logging{
 
   def main(args: Array[String]): Unit = {
-    /*
-    args(0): the app name
-    args(1): the config file path
-    args(2): table name
-     */
     if (args.length != 2) {
       logError("Please input two arguments: \n \t 1) appName: the name of the application \n \t " +
         "2)configFilePath: this file path for the configuration file path")
       return
     }
 
-    val sparkConf = new SparkConf().setAppName(args(0)).setMaster("local[4]")
+    val sparkConf = new SparkConf().setAppName(args(0)).setMaster("local[6]")
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", classOf[VectorKryoRegistrator].getName)
 
