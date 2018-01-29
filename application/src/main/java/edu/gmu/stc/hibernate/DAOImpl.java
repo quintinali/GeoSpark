@@ -194,7 +194,6 @@ public class DAOImpl<T> implements DAO {
     }
 
 
-
     public void update(Object object) {
         if(!isSetup()) {
             System.exit(-1);

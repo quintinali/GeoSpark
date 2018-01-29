@@ -10,7 +10,7 @@ import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
 /**
   * Created by Fei Hu.
   */
-object OverlapPerformanceTest {
+object GeoSpark_OverlapTest {
 
   def main(args: Array[String]): Unit = {
     val sparkConf = new SparkConf().setAppName(args(4))

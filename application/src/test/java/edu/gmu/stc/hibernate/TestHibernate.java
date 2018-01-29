@@ -16,7 +16,7 @@ public class TestHibernate {
   public static void main(String[] args) {
     String tableName = "table_shp";
     Configuration configuration = new Configuration();
-    configuration.addResource(new Path("/Users/feihu/Documents/GitHub/GeoSpark/conf/conf.xml"));
+    configuration.addResource(new Path("/Users/feihu/Documents/GitHub/GeoSpark/config/conf.xml"));
     PhysicalNameStrategyImpl physicalNameStrategy = new PhysicalNameStrategyImpl(tableName);
     Session session = HibernateUtil
         .createSessionFactoryWithPhysicalNamingStrategy(configuration, physicalNameStrategy, ShapeFileMeta.class)

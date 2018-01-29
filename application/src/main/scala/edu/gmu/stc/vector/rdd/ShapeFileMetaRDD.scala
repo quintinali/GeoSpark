@@ -7,7 +7,7 @@ import edu.gmu.stc.vector.parition.{PartitionUtil, SpatialPartitioner}
 import edu.gmu.stc.vector.rdd.index.IndexOperator
 import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta
 import edu.gmu.stc.vector.shapefile.meta.index.ShapeFileMetaIndexInputFormat
-import org.apache.spark.{Partition, SparkContext, TaskContext}
+import org.apache.spark.{Partition, SerializableWritable, SparkContext, TaskContext}
 import org.apache.spark.rdd.RDD
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.rdd.NewHadoopRDD
@@ -26,12 +26,19 @@ import scala.collection.JavaConverters._
   * Created by Fei Hu on 1/24/18.
   */
 
-class ShapeFileMetaRDD extends Serializable with Logging {
+class ShapeFileMetaRDD (sc: SparkContext, @transient conf: Configuration) extends Serializable with Logging {
   private var shapeFileMetaRDD: RDD[ShapeFileMeta] = _
 
   private var indexedShapeFileMetaRDD: RDD[SpatialIndex] = _
 
   private var partitioner: SpatialPartitioner = _
+
+  private val confBroadcast = sc.broadcast(new SerializableWritable(conf))
+
+  def getConf: Configuration = {
+    val conf: Configuration = confBroadcast.value.value
+    conf
+  }
 
   def initializeShapeFileMetaRDD(sc: SparkContext, conf: Configuration): Unit = {
     shapeFileMetaRDD = new NewHadoopRDD[ShapeKey, ShapeFileMeta](sc,
@@ -107,6 +114,26 @@ class ShapeFileMetaRDD extends Serializable with Logging {
       val dao = new DAOImpl[ShapeFileMeta]()
       dao.setSession(session)
       dao.insertDynamicTableObjectList(tableName, itor.asJava)
+      session.close()
+    })
+  }
+
+  def saveShapeFileMetaToDB(): Unit = {
+    shapeFileMetaRDD.foreachPartition(itor => {
+      val shapeFileMetaList = itor.toList
+      //TODO: make sure the table name is right
+      val tableName = shapeFileMetaList.head.getFilePath.split("/").last.toLowerCase
+
+      logInfo("******* Save into the table [%s]".format(tableName))
+
+      val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
+      val session = HibernateUtil
+        .createSessionFactoryWithPhysicalNamingStrategy(getConf, physicalNameStrategy,
+          classOf[ShapeFileMeta])
+        .openSession
+      val dao = new DAOImpl[ShapeFileMeta]()
+      dao.setSession(session)
+      dao.insertDynamicTableObjectList(tableName, shapeFileMetaList.asJava.iterator())
       session.close()
     })
   }

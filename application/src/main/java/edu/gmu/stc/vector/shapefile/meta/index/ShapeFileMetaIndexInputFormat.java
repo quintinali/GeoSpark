@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.gmu.stc.config.ConfigParameter;
 import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta;
 import edu.gmu.stc.vector.shapefile.meta.index.reader.CombineShapeFileMetaIndexReader;
 
@@ -42,11 +43,11 @@ public class ShapeFileMetaIndexInputFormat extends CombineFileInputFormat<ShapeK
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
         // get input paths and assign a split for every single path
-        String path = job.getConfiguration().get("mapred.input.dir");
+        String path = job.getConfiguration().get(ConfigParameter.INPUT_DIR_PATH);
         String[] paths = path.split(",");
         List<InputSplit> splits = new ArrayList<>();
         for(int i = 0; i < paths.length; ++i){
-            job.getConfiguration().set("mapred.input.dir", paths[i]);
+            job.getConfiguration().set(ConfigParameter.INPUT_DIR_PATH, paths[i]);
             splits.add(super.getSplits(job).get(0));
         }
         return splits;

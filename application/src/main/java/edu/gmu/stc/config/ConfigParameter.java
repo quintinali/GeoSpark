@@ -13,4 +13,7 @@ public class ConfigParameter {
   public static final String HIBERNATE_DIALECT = "hibernate.dialect";  //org.hibernate.dialect.PostgreSQL9Dialect
   public static final String HIBERNATE_HBM2DDL_AUTO = "hibernate.hbm2ddl.auto"; //update
 
+  //HDFS
+  public static final String INPUT_DIR_PATH = "mapred.input.dir";
+
 }

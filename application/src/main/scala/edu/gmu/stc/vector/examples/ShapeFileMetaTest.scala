@@ -18,7 +18,7 @@ object ShapeFileMetaTest extends App with Logging{
     .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     .set("spark.kryo.registrator", classOf[VectorKryoRegistrator].getName)
 
-  val confFilePath = "/Users/feihu/Documents/GitHub/GeoSpark/conf/conf.xml"
+  val confFilePath = "/Users/feihu/Documents/GitHub/GeoSpark/config/conf.xml"
   val sc = new SparkContext(sparkConf)
   val hConf = new Configuration()
   hConf.addResource(new Path(confFilePath))
@@ -38,14 +38,14 @@ object ShapeFileMetaTest extends App with Logging{
   val maxX = 180
   val maxY = 180
   val partitionNum = 24
-  val shapeFileMetaRDD1 = new ShapeFileMetaRDD
+  val shapeFileMetaRDD1 = new ShapeFileMetaRDD(sc, hConf)
   val table1 = "Impervious_Surface_2015_DC".toLowerCase
   shapeFileMetaRDD1.initializeShapeFileMetaRDD(sc, table1, partitionNum, minX, minY, maxX, maxY)
   shapeFileMetaRDD1.indexPartition(IndexType.RTREE)
   shapeFileMetaRDD1.getIndexedShapeFileMetaRDD.cache()
   println("******shapeFileMetaRDD1****************", shapeFileMetaRDD1.getShapeFileMetaRDD.count())
 
-  val shapeFileMetaRDD2 = new ShapeFileMetaRDD
+  val shapeFileMetaRDD2 = new ShapeFileMetaRDD(sc, hConf)
   val table2 = "Soil_Type_by_Slope_DC".toLowerCase
   shapeFileMetaRDD2.initializeShapeFileMetaRDD(sc, shapeFileMetaRDD1.getPartitioner, table2, partitionNum, minX, minY, maxX, maxY)
   shapeFileMetaRDD2.getShapeFileMetaRDD.cache()
@@ -73,6 +73,4 @@ object ShapeFileMetaTest extends App with Logging{
   val geometryRDD = new GeometryRDD
   geometryRDD.intersect(shapeFileMetaRDD1, shapeFileMetaRDD2, partitionNum)
   logInfo("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
-
-
 }

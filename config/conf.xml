@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+    <property>
+        <name>hibernate.connection.driver_class</name>
+        <value>org.postgresql.Driver</value>
+    </property>
+
+    <property>
+        <name>hibernate.connection.url</name>
+        <value>jdbc:postgresql://localhost:5432/hibernate_test</value>
+    </property>
+
+    <property>
+        <name>hibernate.connection.username</name>
+        <value>feihu</value>
+    </property>
+
+    <property>
+        <name>hibernate.connection.password</name>
+        <value>feihu</value>
+    </property>
+
+    <property>
+        <name>hibernate.dialect</name>
+        <value>org.hibernate.dialect.PostgreSQL9Dialect</value>
+    </property>
+
+    <property>
+        <name>hibernate.hbm2ddl.auto</name>
+        <value>update</value>
+    </property>
+
+    <property>
+        <name>mapred.input.dir</name>
+        <value>/Users/feihu/Documents/GitHub/GeoSpark/application/src/main/resources/data/Washington_DC/Impervious_Surface_2015_DC,/Users/feihu/Documents/GitHub/GeoSpark/application/src/main/resources/data/Washington_DC/Soil_Type_by_Slope_DC</value>
+    </property>
+
+    <property>
+        <name>shapefile.index.tablename</name>
+        <value>Impervious_Surface_2015_DC,Soil_Type_by_Slope_DC</value>
+    </property>
+</configuration>
