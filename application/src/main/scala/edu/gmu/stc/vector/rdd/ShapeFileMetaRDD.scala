@@ -159,6 +159,14 @@ class ShapeFileMetaRDD (sc: SparkContext, @transient conf: Configuration) extend
       .map(tuple => tuple._2)
   }
 
+  def spatialJoinV2(shapeFileMetaRDD2: ShapeFileMetaRDD, partitionNum: Int): RDD[(Long, Set[Long])] = {
+    this.indexedShapeFileMetaRDD
+      .zipPartitions(shapeFileMetaRDD2.getShapeFileMetaRDD)(IndexOperator.spatialJoinV2)
+      .distinct()
+      .groupByKey()
+      .map(tuple => (tuple._1, tuple._2.toSet[Long]))
+  }
+
   def spatialIntersect(shapeFileMetaRDD2: ShapeFileMetaRDD): RDD[Geometry] = {
     this.indexedShapeFileMetaRDD
       .zipPartitions(shapeFileMetaRDD2.getShapeFileMetaRDD, preservesPartitioning = true)(IndexOperator.spatialIntersect)

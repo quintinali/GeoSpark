@@ -12,6 +12,7 @@ import org.apache.spark.internal.Logging
 import org.datasyslab.geospark.enums.IndexType
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
@@ -56,6 +57,22 @@ object IndexOperator extends Logging{
         overlapped.map(shapeMeta1 => (shapeMeta1.asInstanceOf[ShapeFileMeta], shapeMeta))
       })
     }).foldLeft(Iterator[(ShapeFileMeta, ShapeFileMeta)]())(_ ++ _)
+  }
+
+  def spatialJoinV2(iterator1: Iterator[SpatialIndex],
+                  iterator2: Iterator[ShapeFileMeta])
+  : Iterator[(Long, Long)] = {
+    if (iterator1.isEmpty || iterator2.isEmpty) {
+      return List[(Long, Long)]().iterator
+    }
+
+    iterator1.map(spatialIndex => {
+      iterator2.flatMap(shapeMeta => {
+        val overlapped = spatialIndex.query(shapeMeta.getEnvelopeInternal).asScala
+        //.asInstanceOf[Iterator[ShapeFileMeta]]
+        overlapped.map(shapeMeta1 => (shapeMeta1.asInstanceOf[ShapeFileMeta].getIndex.toLong, shapeMeta.getIndex.toLong))
+      })
+    }).foldLeft(Iterator[(Long, Long)]())(_ ++ _)
   }
 
   def spatialIntersect(iterator1: Iterator[SpatialIndex],
