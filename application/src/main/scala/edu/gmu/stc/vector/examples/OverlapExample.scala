@@ -1,7 +1,7 @@
 package edu.gmu.stc.vector.examples
 
 import edu.gmu.stc.vector.operation.Overlap.intersect
-import edu.gmu.stc.vector.operation.TaskUtil.show_timing
+import edu.gmu.stc.vector.operation.OperUtil.show_timing
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
 import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader

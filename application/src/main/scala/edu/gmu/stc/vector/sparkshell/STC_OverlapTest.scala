@@ -47,13 +47,12 @@ object STC_OverlapTest extends Logging{
     val maxX = 180
     val maxY = 180
 
-
     val shapeFileMetaRDD1 = new ShapeFileMetaRDD(sc, hConf)
     val table1 = tableNames(0)
     shapeFileMetaRDD1.initializeShapeFileMetaRDD(sc, table1, partitionNum, minX, minY, maxX, maxY)
     shapeFileMetaRDD1.indexPartition(IndexType.RTREE)
     shapeFileMetaRDD1.getIndexedShapeFileMetaRDD.cache()
-    println("******shapeFileMetaRDD1****************", shapeFileMetaRDD1.getShapeFileMetaRDD.count())
+    //println("******shapeFileMetaRDD1****************", shapeFileMetaRDD1.getShapeFileMetaRDD.count())
 
     val shapeFileMetaRDD2 = new ShapeFileMetaRDD(sc, hConf)
     val table2 = tableNames(1)
@@ -62,7 +61,7 @@ object STC_OverlapTest extends Logging{
 
     shapeFileMetaRDD2.getShapeFileMetaRDD.cache()
 
-    println("******shapeFileMetaRDD2****************", shapeFileMetaRDD2.getShapeFileMetaRDD.count())
+    //println("******shapeFileMetaRDD2****************", shapeFileMetaRDD2.getShapeFileMetaRDD.count())
 
     println(shapeFileMetaRDD1.getShapeFileMetaRDD.partitions.size, "**********************",
       shapeFileMetaRDD2.getShapeFileMetaRDD.partitions.size)

@@ -1,7 +1,7 @@
 package edu.gmu.stc.vector.sparkshell
 
 import edu.gmu.stc.vector.operation.Overlap.intersect
-import edu.gmu.stc.vector.operation.TaskUtil.show_timing
+import edu.gmu.stc.vector.operation.OperUtil.show_timing
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator

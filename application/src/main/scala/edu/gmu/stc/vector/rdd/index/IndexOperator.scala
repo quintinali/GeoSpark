@@ -41,6 +41,7 @@ class IndexOperator(indexType: String) extends Serializable {
 }
 
 object IndexOperator extends Logging{
+
   def spatialJoin(iterator1: Iterator[SpatialIndex],
                   iterator2: Iterator[ShapeFileMeta])
   : Iterator[(ShapeFileMeta, ShapeFileMeta)] = {
