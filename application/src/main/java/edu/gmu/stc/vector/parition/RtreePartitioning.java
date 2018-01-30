@@ -52,7 +52,7 @@ public class RtreePartitioning implements Serializable{
             grids.add(envelope);
           }
 
-          saveGridAsGeoJSON("/Users/feihu/Documents/GitHub/GeoSpark/" + samples.size() + ".geojson");
+          //saveGridAsGeoJSON("/Users/feihu/Documents/GitHub/GeoSpark/" + samples.size() + ".geojson");
         }
 
 	/**
