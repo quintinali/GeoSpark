@@ -1,6 +1,7 @@
 package edu.gmu.stc.vector.sparkshell
 
 import edu.gmu.stc.config.ConfigParameter
+import edu.gmu.stc.hibernate.HibernateUtil
 import edu.gmu.stc.vector.examples.ShapeFileMetaTest.logInfo
 import edu.gmu.stc.vector.rdd.{GeometryRDD, ShapeFileMetaRDD}
 import edu.gmu.stc.vector.serde.VectorKryoRegistrator
@@ -25,9 +26,13 @@ object STC_BuildIndexTest extends Logging{
       return
     }
 
-    val sparkConf = new SparkConf().setAppName(args(0)).setMaster("local[6]")
+    val sparkConf = new SparkConf().setAppName(args(0))//.setMaster("local[6]")
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", classOf[VectorKryoRegistrator].getName)
+
+    if (System.getProperty("os.name").equals("Mac OS X")) {
+      sparkConf.setMaster("local[6]")
+    }
 
     val sc = new SparkContext(sparkConf)
 
