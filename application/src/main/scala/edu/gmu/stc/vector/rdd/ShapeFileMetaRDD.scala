@@ -82,6 +82,65 @@ class ShapeFileMetaRDD (sc: SparkContext, @transient conf: Configuration) extend
       .map(tuple => tuple._2)
   }
 
+  def initializeShapeFileMetaRDDAndPartitioner(sc: SparkContext,
+                                               tableName: String,
+                                               gridType: GridType,
+                                               partitionNum: Int, minX: Double, minY: Double,
+                                               maxX: Double, maxY: Double): Unit = {
+    val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
+    val hibernateUtil = new HibernateUtil
+    hibernateUtil
+      .createSessionFactoryWithPhysicalNamingStrategy(sc.hadoopConfiguration, physicalNameStrategy,
+        classOf[ShapeFileMeta])
+    val session = hibernateUtil.getSession
+    val dao = new DAOImpl[ShapeFileMeta]()
+    dao.setSession(session)
+    val hql = ShapeFileMeta.getSQLForOverlappedRows(tableName, minX, minY, maxX, maxY)
+
+    val shapeFileMetaList = dao.findByQuery(hql, classOf[ShapeFileMeta]).asScala
+    val envelopes = shapeFileMetaList.map(shapeFileMeta => shapeFileMeta.getEnvelopeInternal)
+
+    logInfo("Number of queried shapefile metas is : " + envelopes.size)
+
+    session.close()
+    hibernateUtil.closeSessionFactory()
+
+    //initialize the partitioner
+    this.partitioner = PartitionUtil.spatialPartitioning(gridType, partitionNum, envelopes.asJava)
+
+    session.close()
+    hibernateUtil.closeSessionFactory()
+
+    this.shapeFileMetaRDD = sc.parallelize(shapeFileMetaList, partitionNum)
+  }
+
+  def initializeShapeFileMetaRDDWithoutPartition(sc: SparkContext,
+                                                 tableName: String,
+                                                 partitionNum: Int, minX: Double, minY: Double,
+                                                 maxX: Double, maxY: Double): Unit = {
+    val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
+    val hibernateUtil = new HibernateUtil
+    hibernateUtil
+      .createSessionFactoryWithPhysicalNamingStrategy(sc.hadoopConfiguration, physicalNameStrategy,
+        classOf[ShapeFileMeta])
+    val session = hibernateUtil.getSession
+    val dao = new DAOImpl[ShapeFileMeta]()
+    dao.setSession(session)
+    val hql = ShapeFileMeta.getSQLForOverlappedRows(tableName, minX, minY, maxX, maxY)
+
+    val shapeFileMetaList = dao.findByQuery(hql, classOf[ShapeFileMeta]).asScala
+
+    logInfo("Number of queried shapefile metas is : " + shapeFileMetaList.size)
+
+    session.close()
+    hibernateUtil.closeSessionFactory()
+
+    session.close()
+    hibernateUtil.closeSessionFactory()
+
+    this.shapeFileMetaRDD = sc.parallelize(shapeFileMetaList, partitionNum)
+  }
+
   def initializeShapeFileMetaRDD(sc: SparkContext, partitioner: SpatialPartitioner,
                                  tableName: String, partitionNum: Int,
                                  minX: Double, minY: Double, maxX: Double, maxY: Double) = {

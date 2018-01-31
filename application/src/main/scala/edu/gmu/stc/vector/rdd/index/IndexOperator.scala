@@ -21,7 +21,7 @@ import scala.collection.mutable.{ArrayBuffer, ListBuffer}
   */
 class IndexOperator(indexType: String) extends Serializable {
 
-  def buildIndex(iterator: Iterator[ShapeFileMeta]): Iterator[SpatialIndex] = {
+  def buildIndex(iterator: Iterator[Geometry]): Iterator[SpatialIndex] = {
     val spatialIndex: SpatialIndex = if (IndexType.getIndexType(indexType) == IndexType.RTREE) {
                                           new STRtree
                                         } else {
@@ -43,20 +43,37 @@ class IndexOperator(indexType: String) extends Serializable {
 
 object IndexOperator extends Logging{
 
-  def spatialJoin(iterator1: Iterator[SpatialIndex],
-                  iterator2: Iterator[ShapeFileMeta])
-  : Iterator[(ShapeFileMeta, ShapeFileMeta)] = {
+  def spatialJoin[T <: Geometry](iterator1: Iterator[SpatialIndex],
+                  iterator2: Iterator[T])
+  : Iterator[(T, T)] = {
     if (iterator1.isEmpty || iterator2.isEmpty) {
-      return List[(ShapeFileMeta, ShapeFileMeta)]().iterator
+      return List[(T, T)]().iterator
     }
 
     iterator1.map(spatialIndex => {
       iterator2.flatMap(shapeMeta => {
         val overlapped = spatialIndex.query(shapeMeta.getEnvelopeInternal).asScala
           //.asInstanceOf[Iterator[ShapeFileMeta]]
-        overlapped.map(shapeMeta1 => (shapeMeta1.asInstanceOf[ShapeFileMeta], shapeMeta))
+        overlapped.map(shapeMeta1 => (shapeMeta1.asInstanceOf[T], shapeMeta))
       })
-    }).foldLeft(Iterator[(ShapeFileMeta, ShapeFileMeta)]())(_ ++ _)
+    }).foldLeft(Iterator[(T, T)]())(_ ++ _)
+  }
+
+  def geoSpatialJoin[T <: Geometry](iterator1: Iterator[SpatialIndex],
+                                 iterator2: Iterator[T])
+  : Iterator[Geometry] = {
+    if (iterator1.isEmpty || iterator2.isEmpty) {
+      return List[Geometry]().iterator
+    }
+
+    iterator1.map(spatialIndex => {
+      iterator2.flatMap(g2 => {
+        val overlapped = spatialIndex.query(g2.getEnvelopeInternal).asScala
+        //.asInstanceOf[Iterator[ShapeFileMeta]]
+        overlapped.filter(g1 => g1.asInstanceOf[T].intersects(g2))
+          .map(g1 => g1.asInstanceOf[T].intersection(g2))
+      })
+    }).foldLeft(Iterator[Geometry]())(_ ++ _)
   }
 
   def spatialJoinV2(iterator1: Iterator[SpatialIndex],

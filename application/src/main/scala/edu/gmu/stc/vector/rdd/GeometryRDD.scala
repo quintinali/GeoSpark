@@ -1,6 +1,7 @@
 package edu.gmu.stc.vector.rdd
 
 import com.vividsolutions.jts.geom.{Geometry, GeometryFactory}
+import com.vividsolutions.jts.index.SpatialIndex
 import edu.gmu.stc.vector.rdd.index.IndexOperator
 import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta
 import edu.gmu.stc.vector.shapefile.reader.GeometryReaderUtil
@@ -8,6 +9,8 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FSDataInputStream, Path}
 import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
+import org.datasyslab.geospark.enums.IndexType
+import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner
 
 import scala.collection.JavaConverters._
 
@@ -16,8 +19,10 @@ import scala.collection.JavaConverters._
   */
 class GeometryRDD extends Logging{
   private var geometryRDD: RDD[Geometry] = _
+  private var indexedGeometryRDD: RDD[SpatialIndex] = _
+  private var partitioner: SpatialPartitioner = _
 
-  def initialize(shapeFileMetaRDD: ShapeFileMetaRDD, hasAttribute: Boolean):Unit = {
+  def initialize(shapeFileMetaRDD: ShapeFileMetaRDD, hasAttribute: Boolean = false): Unit = {
     this.geometryRDD = shapeFileMetaRDD.getShapeFileMetaRDD.mapPartitions(itor => {
       val shapeFileMetaList = itor.toList
       if (hasAttribute) {
@@ -28,12 +33,18 @@ class GeometryRDD extends Logging{
     })
   }
 
+  def partition(partition: SpatialPartitioner): Unit = {
+    this.partitioner = partition
+    this.geometryRDD = this.geometryRDD.flatMap(geometry => partition.placeObject(geometry).asScala)
+      .partitionBy(partition).map(_._2)
+  }
+
   def intersect(shapeFileMetaRDD1: ShapeFileMetaRDD, shapeFileMetaRDD2: ShapeFileMetaRDD, partitionNum: Int): Unit = {
-    val joinRDD: RDD[(ShapeFileMeta, ShapeFileMeta)] = shapeFileMetaRDD1.spatialJoin(shapeFileMetaRDD2, partitionNum)
+    var joinRDD: RDD[(ShapeFileMeta, ShapeFileMeta)] = shapeFileMetaRDD1.spatialJoin(shapeFileMetaRDD2, partitionNum)
       .sortBy({case (shapeFileMeta1, shapeFileMeta2) => shapeFileMeta1.getShp_offset})
       .repartition(partitionNum)
 
-    joinRDD.cache()
+    joinRDD = joinRDD.cache()
 
     logInfo("************** Number of elements in JoinedRDD: %d".format(joinRDD.count()))
 
@@ -47,5 +58,22 @@ class GeometryRDD extends Logging{
   }
 
   def getGeometryRDD: RDD[Geometry] = this.geometryRDD
+
+  def cache(): Unit = {
+    this.geometryRDD = this.geometryRDD.cache()
+  }
+
+  def uncache(blocking: Boolean = true): Unit = {
+    this.geometryRDD.unpersist(blocking)
+  }
+
+  def indexPartition(indexType: IndexType) = {
+    val indexBuilder = new IndexOperator(indexType.toString)
+    this.indexedGeometryRDD = this.geometryRDD.mapPartitions(indexBuilder.buildIndex)
+  }
+
+  def intersect(other: GeometryRDD): RDD[Geometry] = {
+    this.indexedGeometryRDD.zipPartitions(other.geometryRDD)(IndexOperator.geoSpatialJoin)
+  }
 
 }
