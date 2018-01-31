@@ -23,5 +23,5 @@ object OverlapShellExample {
 
   val outputFile: String = resourceFolder + "dc_overlayMap_intersect_" + System.currentTimeMillis() + ".geojson"
   val numPartition = 24
-  val runtime: Long = show_timing(intersect(sparkSession, shpFile1, shpFile2, numPartition, outputFile))
+  val runtime: Long = show_timing(intersect(sparkSession, "RTREE", shpFile1, shpFile2, numPartition, outputFile))
 }

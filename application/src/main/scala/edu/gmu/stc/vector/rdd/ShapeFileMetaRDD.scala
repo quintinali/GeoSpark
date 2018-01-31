@@ -52,6 +52,7 @@ class ShapeFileMetaRDD (sc: SparkContext, @transient conf: Configuration) extend
 
   def initializeShapeFileMetaRDD(sc: SparkContext,
                                  tableName: String,
+                                 gridType: GridType,
                                  partitionNum: Int, minX: Double, minY: Double,
                                  maxX: Double, maxY: Double): Unit = {
     val physicalNameStrategy = new PhysicalNameStrategyImpl(tableName)
@@ -73,7 +74,7 @@ class ShapeFileMetaRDD (sc: SparkContext, @transient conf: Configuration) extend
     hibernateUtil.closeSessionFactory()
 
     //initialize the partitioner
-    this.partitioner = PartitionUtil.spatialPartitioning(GridType.RTREE, partitionNum, envelopes.asJava)
+    this.partitioner = PartitionUtil.spatialPartitioning(gridType, partitionNum, envelopes.asJava)
 
     shapeFileMetaRDD = sc.parallelize(shapeFileMetaList, partitionNum)
       .flatMap(shapefileMeta => partitioner.placeObject(shapefileMeta).asScala)

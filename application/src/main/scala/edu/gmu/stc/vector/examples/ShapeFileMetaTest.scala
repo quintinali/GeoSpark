@@ -6,7 +6,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.spark.internal.Logging
 import org.apache.spark.{SparkConf, SparkContext}
-import org.datasyslab.geospark.enums.IndexType
+import org.datasyslab.geospark.enums.{GridType, IndexType}
 
 /**
   * Created by Fei Hu on 1/24/18.
@@ -40,7 +40,8 @@ object ShapeFileMetaTest extends App with Logging{
   val partitionNum = 24
   val shapeFileMetaRDD1 = new ShapeFileMetaRDD(sc, hConf)
   val table1 = "Impervious_Surface_2015_DC".toLowerCase
-  shapeFileMetaRDD1.initializeShapeFileMetaRDD(sc, table1, partitionNum, minX, minY, maxX, maxY)
+  val gridType = GridType.getGridType("RTREE") //EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE
+  shapeFileMetaRDD1.initializeShapeFileMetaRDD(sc, table1, gridType, partitionNum, minX, minY, maxX, maxY)
   shapeFileMetaRDD1.indexPartition(IndexType.RTREE)
   shapeFileMetaRDD1.getIndexedShapeFileMetaRDD.cache()
   println("******shapeFileMetaRDD1****************", shapeFileMetaRDD1.getShapeFileMetaRDD.count())
