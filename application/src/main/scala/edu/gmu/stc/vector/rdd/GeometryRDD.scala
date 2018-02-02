@@ -11,8 +11,11 @@ import org.apache.spark.internal.Logging
 import org.apache.spark.rdd.RDD
 import org.datasyslab.geospark.enums.IndexType
 import org.datasyslab.geospark.spatialPartitioning.SpatialPartitioner
+import org.wololo.geojson.{Feature, FeatureCollection}
+import org.wololo.jts2geojson.GeoJSONWriter
 
 import scala.collection.JavaConverters._
+import scala.reflect.ClassTag
 
 /**
   * Created by Fei Hu on 1/26/18.
@@ -72,8 +75,29 @@ class GeometryRDD extends Logging{
     this.indexedGeometryRDD = this.geometryRDD.mapPartitions(indexBuilder.buildIndex)
   }
 
-  def intersect(other: GeometryRDD): RDD[Geometry] = {
-    this.indexedGeometryRDD.zipPartitions(other.geometryRDD)(IndexOperator.geoSpatialJoin)
+  def intersect(other: GeometryRDD): GeometryRDD = {
+    val geometryRDD = new GeometryRDD
+    geometryRDD.geometryRDD = this.indexedGeometryRDD.zipPartitions(other.geometryRDD)(IndexOperator.geoSpatialJoin)
+    geometryRDD
   }
+
+  def saveAsGeoJSON(outputLocation: String): Unit = {
+    this.geometryRDD.mapPartitions(iterator => {
+      val geoJSONWriter = new GeoJSONWriter
+      val featureList = iterator.map(geometry => {
+        if (geometry.getUserData != null) {
+          val userData = Map("UserData" -> geometry.getUserData)
+          new Feature(geoJSONWriter.write(geometry), userData.asJava)
+        } else {
+          new Feature(geoJSONWriter.write(geometry), null)
+        }
+      }).toList
+
+      val featureCollection = new FeatureCollection(featureList.toArray[Feature])
+      List[String](featureCollection.toString).toIterator
+    }).saveAsTextFile(outputLocation)
+  }
+
+
 
 }

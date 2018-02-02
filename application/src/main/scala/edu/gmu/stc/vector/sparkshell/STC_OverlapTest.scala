@@ -22,7 +22,8 @@ object STC_OverlapTest extends Logging{
       logError("Please input three arguments: " +
         "\n \t 1)configFilePath: this file path for the configuration file path" +
         "\n \t 2) numPartition: the number of partitions" +
-        "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE")
+        "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +
+        "\n \t 4) output file path: the file path for geojson output")
 
       return
     }
@@ -73,7 +74,8 @@ object STC_OverlapTest extends Logging{
 
     val geometryRDD = new GeometryRDD
     geometryRDD.intersect(shapeFileMetaRDD1, shapeFileMetaRDD2, partitionNum)
-    logInfo("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
+    geometryRDD.saveAsGeoJSON(args(3))
+    //logInfo("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
   }
 
 }
