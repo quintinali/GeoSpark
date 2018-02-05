@@ -21,8 +21,9 @@ object STC_BuildIndexTest extends Logging{
 
   def main(args: Array[String]): Unit = {
     if (args.length != 2) {
-      logError("Please input two arguments: \n \t 1) appName: the name of the application \n \t " +
-        "2)configFilePath: this file path for the configuration file path")
+      logError("Please input two arguments: " +
+        "\n \t 1) appName: the name of the application " +
+        "\n \t 2) configFilePath: this file path for the configuration file path")
       return
     }
 
