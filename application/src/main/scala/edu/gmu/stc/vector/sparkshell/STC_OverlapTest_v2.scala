@@ -77,7 +77,14 @@ object STC_OverlapTest_v2 extends Logging{
       + geometryRDD2.getGeometryRDD.partitions.length)
 
     val geometryRDD = geometryRDD1.intersect(geometryRDD2)
-    geometryRDD.saveAsGeoJSON(args(3))
+    //geometryRDD.saveAsGeoJSON(args(3))
+    val filePath = args(3)
+    if (filePath.endsWith("shp")) {
+      geometryRDD.saveAsShapefile(filePath)
+    } else {
+      geometryRDD.saveAsGeoJSON(filePath)
+    }
+
     //logInfo("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
   }
 

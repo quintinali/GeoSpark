@@ -98,6 +98,11 @@ class GeometryRDD extends Logging{
     }).saveAsTextFile(outputLocation)
   }
 
+  def saveAsShapefile(filepath: String): Unit = {
+    val polygons = this.geometryRDD.collect().toList.asJava
+    GeometryReaderUtil.saveAsShapefile(filepath, polygons)
+  }
+
 
 
 }

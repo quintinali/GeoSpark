@@ -2,6 +2,7 @@ package edu.gmu.stc.vector.shapefile.reader;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.Polygon;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -10,11 +11,24 @@ import org.apache.hadoop.fs.Path;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
+import org.geotools.data.FeatureWriter;
+import org.geotools.data.Transaction;
+import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta;
 
@@ -111,6 +125,40 @@ public class GeometryReaderUtil {
     }
 
     return geometries;
+  }
+
+  public static void saveAsShapefile(String filepath, List<Geometry> geometries) throws IOException {
+    File file = new File(filepath);
+    Map<String, Serializable> params = new HashMap<String, Serializable>();
+    params.put(ShapefileDataStoreFactory.URLP.key, file.toURI().toURL());
+    ShapefileDataStore ds = (ShapefileDataStore) new ShapefileDataStoreFactory().createNewDataStore(params);
+
+    //setup the attributes
+    //定义图形信息和属性信息
+    SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
+    tb.setCRS(DefaultGeographicCRS.WGS84);
+    tb.setName("shapefile");
+    tb.add("the_geom", Polygon.class);
+    tb.add("outPolyID", Long.class);
+    tb.add("IDPoly1", Long.class);
+    tb.add("IDPoly2", Long.class);
+    ds.createSchema(tb.buildFeatureType());
+    ds.setCharset(Charset.forName("GBK"));
+    //设置Writer
+    FeatureWriter<SimpleFeatureType, SimpleFeature> writer = ds.getFeatureWriter(ds.getTypeNames()[0], Transaction.AUTO_COMMIT);
+
+    //写下一条
+    for (int i = 0; i < geometries.size(); i++) {
+      SimpleFeature feature = writer.next();
+      feature.setAttribute("the_geom", geometries.get(i));
+      feature.setAttribute("outPolyID", i);
+      //feature.setAttribute("IDPoly1", polygons.get(i));
+      //feature.setAttribute("IDPoly2", clippedLayer.polys.get(i).toPoly);
+    }
+
+    writer.write();
+    writer.close();
+    ds.dispose();
   }
 
 
