@@ -78,6 +78,7 @@ class GeometryRDD extends Logging{
   def intersect(other: GeometryRDD): GeometryRDD = {
     val geometryRDD = new GeometryRDD
     geometryRDD.geometryRDD = this.indexedGeometryRDD.zipPartitions(other.geometryRDD)(IndexOperator.geoSpatialJoin)
+    geometryRDD.geometryRDD = geometryRDD.geometryRDD.filter(geometry => !geometry.isEmpty)
     geometryRDD
   }
 
