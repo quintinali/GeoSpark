@@ -21,7 +21,8 @@ object GeoSpark_OverlapTest extends Logging{
         "\n \t 2) shapefile layer 1 folder name: the name of the first shapefile" +
         "\n \t 3) shapefile layer 2 folder name: the name of the second shapefile" +
         "\n \t 4) number of partitions: the int number of partitions" +
-        "\n \t 5) partition type: it can be EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE")
+        "\n \t 5) partition type: it can be EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE") +
+        "\n \t 6) indexType: the index type for each partition, e.g. QUADTREE, RTREE"
 
       return
     }
@@ -45,7 +46,7 @@ object GeoSpark_OverlapTest extends Logging{
     val numPartition: Int = args(3).toInt
     val outputFile: String = resourceFolder + "%s_%s_overlap_%s".format(args(1), args(2), args(4)) + ".geojson"
 
-    val runtime: Long = show_timing(intersect(sparkSession, args(4), shpFile1, shpFile2, numPartition, outputFile))
+    val runtime: Long = show_timing(intersect(sparkSession, args(4), args(5), shpFile1, shpFile2, numPartition, outputFile))
     println(s"Runtime is : $runtime seconds")
 
     sparkSession.stop()

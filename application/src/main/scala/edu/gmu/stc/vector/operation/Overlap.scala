@@ -20,6 +20,7 @@ object Overlap {
 
   def intersect(sparkSession: SparkSession,
                 gridType: String,
+                indexType: String,
                 shpFile1: String, shpFile2: String,
                 numPartitions: Int,
                 outputFile: String): Unit = {
@@ -33,7 +34,7 @@ object Overlap {
 
     // partition RDD and buildIndex for each partition
     val PARTITION_TYPE = GridType.getGridType(gridType)
-    val INDEX_TYPE = IndexType.RTREE
+    val INDEX_TYPE = IndexType.getIndexType(indexType)
 
     plg1RDD.spatialPartitioning(PARTITION_TYPE, numPartitions)
     plg1RDD.buildIndex(INDEX_TYPE, true)
