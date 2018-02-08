@@ -16,12 +16,13 @@ import org.datasyslab.geospark.enums.{GridType, IndexType}
 object STC_OverlapTest_v2 extends Logging{
   def main(args: Array[String]): Unit = {
 
-    if (args.length != 4) {
+    if (args.length != 5) {
       logError("Please input three arguments: " +
         "\n \t 1)configFilePath: this file path for the configuration file path" +
         "\n \t 2) numPartition: the number of partitions" +
         "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +
-        "\n \t 4) output file path: the file path for geojson output")
+        "\n \t 4) indexType: the index type for each partition, e.g. QUADTREE, RTREE" +
+        "\n \t 5) output file path: the file path for geojson output")
 
       return
     }
@@ -50,6 +51,7 @@ object STC_OverlapTest_v2 extends Logging{
     val maxY = 180
 
     val gridType = GridType.getGridType(args(2)) //EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE
+    val indexType = IndexType.getIndexType(args(3))  //RTREE, QUADTREE
 
     val shapeFileMetaRDD1 = new ShapeFileMetaRDD(sc, hConf)
     val table1 = tableNames(0)
@@ -57,7 +59,7 @@ object STC_OverlapTest_v2 extends Logging{
     val geometryRDD1 = new GeometryRDD
     geometryRDD1.initialize(shapeFileMetaRDD1, hasAttribute = false)
     geometryRDD1.partition(shapeFileMetaRDD1.getPartitioner)
-    geometryRDD1.indexPartition(IndexType.RTREE)
+    geometryRDD1.indexPartition(indexType)
     geometryRDD1.cache()
     logInfo("******geometryRDD1****************" + geometryRDD1.getGeometryRDD.count())
 
@@ -78,7 +80,7 @@ object STC_OverlapTest_v2 extends Logging{
 
     val geometryRDD = geometryRDD1.intersect(geometryRDD2)
 
-    val filePath = args(3)
+    val filePath = args(4)
     if (filePath.endsWith("shp")) {
       geometryRDD.saveAsShapefile(filePath)
     } else {

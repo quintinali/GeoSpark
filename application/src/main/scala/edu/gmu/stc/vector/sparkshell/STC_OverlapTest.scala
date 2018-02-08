@@ -18,12 +18,13 @@ object STC_OverlapTest extends Logging{
 
   def main(args: Array[String]): Unit = {
 
-    if (args.length != 4) {
+    if (args.length != 5) {
       logError("Please input four arguments: " +
         "\n \t 1)configFilePath: this file path for the configuration file path" +
         "\n \t 2) numPartition: the number of partitions" +
         "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +
-        "\n \t 4) output file path: the file path for geojson output")
+        "\n \t 4) indexType: the index type for each partition, e.g. QUADTREE, RTREE" +
+        "\n \t 5) output file path: the file path for geojson output")
 
       return
     }
@@ -52,11 +53,12 @@ object STC_OverlapTest extends Logging{
     val maxY = 180
 
     val gridType = GridType.getGridType(args(2)) //EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE
+    val indexType = IndexType.getIndexType(args(3))  //RTREE, QUADTREE
 
     val shapeFileMetaRDD1 = new ShapeFileMetaRDD(sc, hConf)
     val table1 = tableNames(0)
     shapeFileMetaRDD1.initializeShapeFileMetaRDD(sc, table1, gridType, partitionNum, minX, minY, maxX, maxY)
-    shapeFileMetaRDD1.indexPartition(IndexType.RTREE)
+    shapeFileMetaRDD1.indexPartition(indexType)
     shapeFileMetaRDD1.getIndexedShapeFileMetaRDD.cache()
     println("******shapeFileMetaRDD1****************", shapeFileMetaRDD1.getShapeFileMetaRDD.count())
 
@@ -74,7 +76,13 @@ object STC_OverlapTest extends Logging{
 
     val geometryRDD = new GeometryRDD
     geometryRDD.intersect(shapeFileMetaRDD1, shapeFileMetaRDD2, partitionNum)
-    geometryRDD.saveAsGeoJSON(args(3))
+
+    val filePath = args(4)
+    if (filePath.endsWith("shp")) {
+      geometryRDD.saveAsShapefile(filePath)
+    } else {
+      geometryRDD.saveAsGeoJSON(filePath)
+    }
     //logInfo("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
   }
 

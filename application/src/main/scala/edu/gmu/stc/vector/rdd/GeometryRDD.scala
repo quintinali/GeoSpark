@@ -34,6 +34,8 @@ class GeometryRDD extends Logging{
         GeometryReaderUtil.readGeometries(shapeFileMetaList.asJava).asScala.toIterator
       }
     })
+
+    this.partitioner = shapeFileMetaRDD.getPartitioner
   }
 
   def partition(partition: SpatialPartitioner): Unit = {
