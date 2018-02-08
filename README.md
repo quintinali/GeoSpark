@@ -19,5 +19,5 @@ using GeoSpark.
     - STCSpark_Build_Index: `spark-shell --master yarn --deploy-mode client --num-executors 10 --driver-memory 12g --executor-memory 10g --executor-cores 24 --class edu.gmu.stc.vector.sparkshell.STC_BuildIndexTest --jars /home/fei/GeoSpark/application/target/geospark-application-1.1.0-SNAPSHOT.jar BuildIndex /home/fei/GeoSpark/config/conf.xml`
     - STCSpark_Overlap: `spark-shell --master yarn --deploy-mode client --num-executors 9 --driver-memory 12g --executor-memory 10g --executor-cores 24 --class edu.gmu.stc.vector.sparkshell.STC_OverlapTest --jars /home/fei/GeoSpark/application/target/geospark-application-1.1.0-SNAPSHOT.jar /home/fei/GeoSpark/config/conf.xml 20 GridType IndexType /test.geojson`
     - STCSpark_Overlap_v2: `spark-shell --master yarn --deploy-mode client --num-executors 9 --driver-memory 12g --executor-memory 10g --executor-cores 24 --class edu.gmu.stc.vector.sparkshell.STC_OverlapTest_v2 --jars /home/fei/GeoSpark/application/target/geospark-application-1.1.0-SNAPSHOT.jar /home/fei/GeoSpark/config/conf.xml 60 GridType IndexType /test.geojson`
-    - Available GridType: EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE
-    - Available IndexType: RTREE, QUADTREE
+    - Available GridType: `EQUALGRID`, `HILBERT`, `RTREE`, `VORONOI`, `QUADTREE`, `KDBTREE`
+    - Available IndexType: `RTREE`, `QUADTREE`
