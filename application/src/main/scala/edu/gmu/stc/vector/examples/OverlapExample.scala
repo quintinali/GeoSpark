@@ -38,7 +38,7 @@ object OverlapExample extends App {
   /*val plg1RDD = ShapefileReader.readToPolygonRDD(sparkSession.sparkContext, shpFile1)
   println(plg1RDD.rawSpatialRDD.count())*/
 
-  val runtime = show_timing(intersect(sparkSession, "RTREE", shpFile1, shpFile2, numPartition, outputFile))
+  val runtime = show_timing(intersect(sparkSession, "RTREE", "QUADTREE", shpFile1, shpFile2, numPartition, outputFile))
   LOG.info(s"*** Runtime is : $runtime")
   LOG.info("Finish GeoSpark Overlap Spatial Analysis Example")
 

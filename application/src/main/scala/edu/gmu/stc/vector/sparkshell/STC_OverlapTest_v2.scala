@@ -27,7 +27,7 @@ object STC_OverlapTest_v2 extends Logging{
       return
     }
 
-    val sparkConf = new SparkConf().setAppName("%s_%s_%s".format(STC_OverlapTest.toString, args(1), args(2)))
+    val sparkConf = new SparkConf().setAppName("%s_%s_%s_%s".format("STC_OverlapTest_v2", args(1), args(2), args(3)))
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", classOf[VectorKryoRegistrator].getName)
 

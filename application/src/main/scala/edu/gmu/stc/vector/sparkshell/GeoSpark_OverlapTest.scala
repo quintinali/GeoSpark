@@ -27,7 +27,7 @@ object GeoSpark_OverlapTest extends Logging{
       return
     }
 
-    val sparkConf = new SparkConf().setAppName(GeoSpark_OverlapTest.toString + "_%s_%s".format(args(3), args(4)))
+    val sparkConf = new SparkConf().setAppName("GeoSpark_OverlapTest" + "_%s_%s_%s".format(args(3), args(4), args(5)))
 
     if (System.getProperty("os.name").equals("Mac OS X")) {
       sparkConf.setMaster("local[6]")
