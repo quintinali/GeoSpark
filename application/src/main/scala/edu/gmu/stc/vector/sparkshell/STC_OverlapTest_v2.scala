@@ -108,6 +108,7 @@ object STC_OverlapTest_v2 extends Logging{
       + geometryRDD2.getGeometryRDD.partitions.length)
 
     val geometryRDD = geometryRDD1.intersect(geometryRDD2)
+    geometryRDD.cache()
 
     val filePath = args(4)
     if (filePath.endsWith("shp")) {

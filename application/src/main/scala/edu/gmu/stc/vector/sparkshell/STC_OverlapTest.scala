@@ -76,6 +76,7 @@ object STC_OverlapTest extends Logging{
 
     val geometryRDD = new GeometryRDD
     geometryRDD.intersect(shapeFileMetaRDD1, shapeFileMetaRDD2, partitionNum)
+    geometryRDD.cache()
 
     val filePath = args(4)
     if (filePath.endsWith("shp")) {
@@ -83,7 +84,7 @@ object STC_OverlapTest extends Logging{
     } else {
       geometryRDD.saveAsGeoJSON(filePath)
     }
-    //logInfo("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
+    println("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
   }
 
 }

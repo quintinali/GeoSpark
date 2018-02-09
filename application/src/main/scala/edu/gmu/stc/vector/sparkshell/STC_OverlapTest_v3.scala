@@ -108,6 +108,7 @@ object STC_OverlapTest_v3 extends Logging{
 
     val startTime = System.currentTimeMillis()
     val geometryRDD = geometryRDD1.intersectV2(geometryRDD2, partitionNum)
+    geometryRDD.cache()
     val endTime = System.currentTimeMillis()
     println("******** Intersection time: " + (endTime - startTime)/1000000)
 

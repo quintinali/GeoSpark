@@ -59,6 +59,7 @@ object Overlap {
     // overlap operation
     val intersectRDD = JoinQuery.SpatialIntersectQuery(plg1RDD, plg2RDD, true, true)
     val intersectedResult = new PolygonRDD(intersectRDD)
+
     println("************** Intersection time: " + (t3 - t2)/1000000)
 
     println("************** Num polygons: " + intersectedResult.countWithoutDuplicates())
