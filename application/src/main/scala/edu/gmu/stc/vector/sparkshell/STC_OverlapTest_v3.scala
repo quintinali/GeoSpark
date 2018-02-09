@@ -4,7 +4,6 @@ import edu.gmu.stc.config.ConfigParameter
 import edu.gmu.stc.vector.operation.OperUtil
 import edu.gmu.stc.vector.rdd.{GeometryRDD, ShapeFileMetaRDD}
 import edu.gmu.stc.vector.serde.VectorKryoRegistrator
-import edu.gmu.stc.vector.sparkshell.STC_OverlapTest.{logError, logInfo}
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.spark.internal.Logging
@@ -12,9 +11,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.datasyslab.geospark.enums.{GridType, IndexType}
 
 /**
-  * Created by Fei Hu on 1/31/18.
+  * Created by Fei Hu.
   */
-object STC_OverlapTest_v2 extends Logging{
+object STC_OverlapTest_v3 extends Logging{
   def main(args: Array[String]): Unit = {
 
     if (args.length != 5) {
@@ -105,7 +104,7 @@ object STC_OverlapTest_v2 extends Logging{
       + "**********************"
       + geometryRDD2.getGeometryRDD.partitions.length)
 
-    val geometryRDD = geometryRDD1.intersect(geometryRDD2)
+    val geometryRDD = geometryRDD1.intersectV2(geometryRDD2, partitionNum)
 
     val filePath = args(4)
     if (filePath.endsWith("shp")) {

@@ -59,8 +59,8 @@ object IndexOperator extends Logging{
     }).foldLeft(Iterator[(T, T)]())(_ ++ _)
   }
 
-  def geoSpatialJoin[T <: Geometry](iterator1: Iterator[SpatialIndex],
-                                 iterator2: Iterator[T])
+  def geoSpatialIntersection[T <: Geometry](iterator1: Iterator[SpatialIndex],
+                                            iterator2: Iterator[T])
   : Iterator[Geometry] = {
     if (iterator1.isEmpty || iterator2.isEmpty) {
       return List[Geometry]().iterator
@@ -75,6 +75,24 @@ object IndexOperator extends Logging{
       })
     }).foldLeft(Iterator[Geometry]())(_ ++ _)
   }
+
+  def geoSpatialJoin[T <: Geometry](iterator1: Iterator[SpatialIndex],
+                                            iterator2: Iterator[T])
+  : Iterator[(T, T)] = {
+    if (iterator1.isEmpty || iterator2.isEmpty) {
+      return List[(T, T)]().iterator
+    }
+
+    iterator1.map(spatialIndex => {
+      iterator2.flatMap(g2 => {
+        val overlapped = spatialIndex.query(g2.getEnvelopeInternal).asScala
+        overlapped.filter(g1 => g1.asInstanceOf[T].intersects(g2))
+          .map(g1 => (g1.asInstanceOf[T], g2))
+      })
+    }).foldLeft(Iterator[(T, T)]())(_ ++ _)
+  }
+
+
 
   def spatialJoinV2(iterator1: Iterator[SpatialIndex],
                   iterator2: Iterator[ShapeFileMeta])

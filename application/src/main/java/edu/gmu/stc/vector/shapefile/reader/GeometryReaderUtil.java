@@ -133,8 +133,6 @@ public class GeometryReaderUtil {
     params.put(ShapefileDataStoreFactory.URLP.key, file.toURI().toURL());
     ShapefileDataStore ds = (ShapefileDataStore) new ShapefileDataStoreFactory().createNewDataStore(params);
 
-    //setup the attributes
-    //定义图形信息和属性信息
     SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
     tb.setCRS(DefaultGeographicCRS.WGS84);
     tb.setName("shapefile");
@@ -144,16 +142,13 @@ public class GeometryReaderUtil {
     tb.add("IDPoly2", Long.class);
     ds.createSchema(tb.buildFeatureType());
     ds.setCharset(Charset.forName("GBK"));
-    //设置Writer
+
     FeatureWriter<SimpleFeatureType, SimpleFeature> writer = ds.getFeatureWriter(ds.getTypeNames()[0], Transaction.AUTO_COMMIT);
 
-    //写下一条
     for (int i = 0; i < geometries.size(); i++) {
       SimpleFeature feature = writer.next();
       feature.setAttribute("the_geom", geometries.get(i));
       feature.setAttribute("outPolyID", i);
-      //feature.setAttribute("IDPoly1", polygons.get(i));
-      //feature.setAttribute("IDPoly2", clippedLayer.polys.get(i).toPoly);
     }
 
     writer.write();
