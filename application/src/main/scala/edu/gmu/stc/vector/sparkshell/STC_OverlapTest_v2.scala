@@ -61,6 +61,18 @@ object STC_OverlapTest_v2 extends Logging{
     geometryRDD1.partition(shapeFileMetaRDD1.getPartitioner)
     geometryRDD1.indexPartition(indexType)
     geometryRDD1.cache()
+    //geometryRDD1.getGeometryRDD.foreachPartition(itor => print(itor.size + "  -------1"))
+    val partitionNum1 = geometryRDD1.getGeometryRDD.mapPartitionsWithIndex({
+      case (index, itor) => {
+        List((index, itor.size)).toIterator
+      }
+    }).collect()
+
+    print("********1*************\n")
+    partitionNum1.foreach(println)
+    print("********1*************\n")
+
+
     logInfo("******geometryRDD1****************" + geometryRDD1.getGeometryRDD.count())
 
     val shapeFileMetaRDD2 = new ShapeFileMetaRDD(sc, hConf)
@@ -72,6 +84,17 @@ object STC_OverlapTest_v2 extends Logging{
     geometryRDD2.initialize(shapeFileMetaRDD2, hasAttribute = false)
     geometryRDD2.partition(shapeFileMetaRDD1.getPartitioner)
     geometryRDD2.cache()
+    //geometryRDD2.getGeometryRDD.foreachPartition(itor => print(itor.size + "  -------2"))
+    val partitionNum2 = geometryRDD2.getGeometryRDD.mapPartitionsWithIndex({
+      case (index, itor) => {
+        List((index, itor.size)).toIterator
+      }
+    }).collect()
+
+    print("*********2************\n")
+    partitionNum2.foreach(println)
+    print("*********2************\n")
+
     logInfo("******geometryRDD2****************" + geometryRDD2.getGeometryRDD.count())
 
     logInfo(geometryRDD1.getGeometryRDD.partitions.length
