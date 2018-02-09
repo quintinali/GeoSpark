@@ -27,6 +27,8 @@ object STC_OverlapTest_v3 extends Logging{
       return
     }
 
+    val t = System.currentTimeMillis()
+
     val sparkConf = new SparkConf().setAppName("%s_%s_%s_%s".format("STC_OverlapTest_v2", args(1), args(2), args(3)))
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", classOf[VectorKryoRegistrator].getName)
@@ -62,7 +64,7 @@ object STC_OverlapTest_v3 extends Logging{
     geometryRDD1.indexPartition(indexType)
     geometryRDD1.cache()
 
-    print("*************Counting GeometryRDD1 takes: " + OperUtil.show_timing(geometryRDD1.getGeometryRDD.count()))
+    println("*************Counting GeometryRDD1 Time: " + OperUtil.show_timing(geometryRDD1.getGeometryRDD.count()))
 
     val partitionNum1 = geometryRDD1.getGeometryRDD.mapPartitionsWithIndex({
       case (index, itor) => {
@@ -70,10 +72,10 @@ object STC_OverlapTest_v3 extends Logging{
       }
     }).collect()
 
-    print("********geometryRDD1*************\n")
+    println("********geometryRDD1*************\n")
     partitionNum1.foreach(println)
-    print("********geometryRDD1*************\n")
-    print("******geometryRDD1****************" + geometryRDD1.getGeometryRDD.count())
+    println("********geometryRDD1*************\n")
+    println("******geometryRDD1****************" + geometryRDD1.getGeometryRDD.count())
 
     val shapeFileMetaRDD2 = new ShapeFileMetaRDD(sc, hConf)
     val table2 = tableNames(1)
@@ -85,7 +87,7 @@ object STC_OverlapTest_v3 extends Logging{
     geometryRDD2.partition(shapeFileMetaRDD1.getPartitioner)
     geometryRDD2.cache()
 
-    print("*************Counting GeometryRDD2 takes: " + OperUtil.show_timing(geometryRDD2.getGeometryRDD.count()))
+    println("*************Counting GeometryRDD2 Time: " + OperUtil.show_timing(geometryRDD2.getGeometryRDD.count()))
 
 
     val partitionNum2 = geometryRDD2.getGeometryRDD.mapPartitionsWithIndex({
@@ -94,17 +96,20 @@ object STC_OverlapTest_v3 extends Logging{
       }
     }).collect()
 
-    print("*********geometryRDD2************\n")
+    println("*********geometryRDD2************\n")
     partitionNum2.foreach(println)
-    print("*********geometryRDD2************\n")
+    println("*********geometryRDD2************\n")
 
-    print("******geometryRDD2****************" + geometryRDD2.getGeometryRDD.count())
+    println("******geometryRDD2****************" + geometryRDD2.getGeometryRDD.count())
 
     logInfo(geometryRDD1.getGeometryRDD.partitions.length
       + "**********************"
       + geometryRDD2.getGeometryRDD.partitions.length)
 
+    val startTime = System.currentTimeMillis()
     val geometryRDD = geometryRDD1.intersectV2(geometryRDD2, partitionNum)
+    val endTime = System.currentTimeMillis()
+    println("******** Intersection time: " + (endTime - startTime)/1000000)
 
     val filePath = args(4)
     if (filePath.endsWith("shp")) {
@@ -113,7 +118,9 @@ object STC_OverlapTest_v3 extends Logging{
       geometryRDD.saveAsGeoJSON(filePath)
     }
 
-    //logInfo("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
+    println("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
+
+    println("************** Total time: " + (System.currentTimeMillis() - t)/1000000)
   }
 
 }
