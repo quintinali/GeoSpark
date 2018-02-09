@@ -17,7 +17,7 @@ object STC_OverlapTest_v2 extends Logging{
   def main(args: Array[String]): Unit = {
 
     if (args.length != 5) {
-      logError("Please input three arguments: " +
+      logError("Please input 5 arguments: " +
         "\n \t 1)configFilePath: this file path for the configuration file path" +
         "\n \t 2) numPartition: the number of partitions" +
         "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +

@@ -16,7 +16,7 @@ object GeoSpark_OverlapTest extends Logging{
 
   def main(args: Array[String]): Unit = {
     if (args.length != 6) {
-      logError("Please input five arguments: " +
+      logError("Please input 6 arguments: " +
         "\n \t 1) input dir path: this directory path for the shapefiles" +
         "\n \t 2) shapefile layer 1 folder name: the name of the first shapefile" +
         "\n \t 3) shapefile layer 2 folder name: the name of the second shapefile" +
