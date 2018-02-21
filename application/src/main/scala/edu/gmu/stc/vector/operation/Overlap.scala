@@ -19,20 +19,30 @@ object Overlap {
   val LOG: Logger = Logger.getLogger(Overlap.getClass)
 
   def intersect(sparkSession: SparkSession,
+                gridType: String,
+                indexType: String,
                 shpFile1: String, shpFile2: String,
                 numPartitions: Int,
                 outputFile: String): Unit = {
 
+    val t = System.currentTimeMillis()
+
     val plg1RDD = ShapefileReader.readToPolygonRDD(sparkSession.sparkContext, shpFile1)
     val plg2RDD = ShapefileReader.readToPolygonRDD(sparkSession.sparkContext, shpFile2)
+    val t1 = System.currentTimeMillis()
+
+    println("************** Read shapefile time: " + (t1 - t)/1000000)
 
     // get the boundary of RDD
     plg1RDD.analyze()
     plg2RDD.analyze()
+    val t2 = System.currentTimeMillis()
+    println("************** Analyzing bbox time: " + (t2 - t1)/1000000)
+
 
     // partition RDD and buildIndex for each partition
-    val PARTITION_TYPE = GridType.getGridType("RTREE")
-    val INDEX_TYPE = IndexType.RTREE
+    val PARTITION_TYPE = GridType.getGridType(gridType)
+    val INDEX_TYPE = IndexType.getIndexType(indexType)
 
     plg1RDD.spatialPartitioning(PARTITION_TYPE, numPartitions)
     plg1RDD.buildIndex(INDEX_TYPE, true)
@@ -42,10 +52,20 @@ object Overlap {
     plg2RDD.spatialPartitioning(plg1RDD.getPartitioner)
     plg2RDD.buildIndex(INDEX_TYPE, true)
     plg2RDD.indexedRDD = plg2RDD.indexedRDD.cache()
+    val t3 = System.currentTimeMillis()
+    println("************** Partition time: " + (t3 - t2)/1000000)
+
 
     // overlap operation
     val intersectRDD = JoinQuery.SpatialIntersectQuery(plg1RDD, plg2RDD, true, true)
     val intersectedResult = new PolygonRDD(intersectRDD)
+
+    println("************** Intersection time: " + (t3 - t2)/1000000)
+
+    println("************** Num polygons: " + intersectedResult.countWithoutDuplicates())
+
+    println("************** Total time: " + (System.currentTimeMillis() - t)/1000000)
+
 
     if (isDebug) {
       val numOfPolygons = intersectedResult.countWithoutDuplicates()

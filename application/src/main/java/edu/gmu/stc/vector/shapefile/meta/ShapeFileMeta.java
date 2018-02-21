@@ -3,10 +3,21 @@ package edu.gmu.stc.vector.shapefile.meta;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.CoordinateFilter;
+import com.vividsolutions.jts.geom.CoordinateSequenceComparator;
+import com.vividsolutions.jts.geom.CoordinateSequenceFilter;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryComponentFilter;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.GeometryFilter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 
 import java.io.Serializable;
 
@@ -18,7 +29,7 @@ import javax.persistence.Id;
  * Created by Fei Hu.
  */
 @Entity
-public class ShapeFileMeta implements Serializable {
+public class ShapeFileMeta extends Geometry implements Serializable {
   private static final Log LOG = LogFactory.getLog(ShapeFileMeta.class);
 
   @Id
@@ -47,12 +58,13 @@ public class ShapeFileMeta implements Serializable {
   private Envelope envelope = null;
 
   public ShapeFileMeta() {
-
+    super(new GeometryFactory());
   }
 
   public ShapeFileMeta(Long index, int typeID, long shp_offset, int shp_length, long dbf_offset,
                        int dbf_length, String filePath, double minX, double minY, double maxX,
                        double maxY) {
+    super(new GeometryFactory());
     this.index = index;
     this.typeID = typeID;
     this.shp_offset = shp_offset;
@@ -67,6 +79,7 @@ public class ShapeFileMeta implements Serializable {
   }
 
   public ShapeFileMeta(ShpMeta shpMeta, DbfMeta dbfMeta, String filePath) {
+    super(new GeometryFactory());
     this.index = shpMeta.getIndex();
     this.typeID = shpMeta.getTypeID();
 
@@ -206,9 +219,60 @@ public class ShapeFileMeta implements Serializable {
                          shp_length, dbf_offset, dbf_length);
   }
 
+  @Override
+  public Geometry reverse() {
+    return null;
+  }
+
+  @Override
+  public boolean equalsExact(Geometry other, double tolerance) {
+    return false;
+  }
+
+  @Override
+  public void apply(CoordinateFilter filter) {
+
+  }
+
+  @Override
+  public void apply(CoordinateSequenceFilter filter) {
+
+  }
+
+  @Override
+  public void apply(GeometryFilter filter) {
+
+  }
+
+  @Override
+  public void apply(GeometryComponentFilter filter) {
+
+  }
+
+  @Override
+  public void normalize() {
+
+  }
+
+  @Override
+  protected Envelope computeEnvelopeInternal() {
+    return null;
+  }
+
+  @Override
+  protected int compareToSameClass(Object o) {
+    return 0;
+  }
+
+  @Override
+  protected int compareToSameClass(Object o, CoordinateSequenceComparator comp) {
+    return 0;
+  }
+
   public static String getSQLForOverlappedRows(String tableName, double minX, double minY, double maxX, double maxY) {
 
-    String sql = String.format("FROM %s WHERE (%s < minX OR %s > maxX OR %s < minY OR %s > maxY) = FALSE",
+    //TODO: the typeID is hardcoded into 5
+    String sql = String.format("FROM %s WHERE (%s < minX OR %s > maxX OR %s < minY OR %s > maxY) = FALSE AND typeID = 5",
                                tableName,
                                String.valueOf(maxX), String.valueOf(minX),
                                String.valueOf(maxY), String.valueOf(minY)).toLowerCase();
@@ -216,12 +280,51 @@ public class ShapeFileMeta implements Serializable {
     return sql;
   }
 
+  @Override
+  public String getGeometryType() {
+    return "ShapeFileMeta";
+  }
+
+  @Override
+  public Coordinate getCoordinate() {
+    return new Coordinate();
+  }
+
+  @Override
+  public Coordinate[] getCoordinates() {
+    return new Coordinate[0];
+  }
+
+  @Override
+  public int getNumPoints() {
+    return 4;
+  }
+
+  @Override
+  public boolean isEmpty() {
+    return false;
+  }
+
+  @Override
+  public int getDimension() {
+    return 2;
+  }
+
+  @Override
+  public Geometry getBoundary() {
+    return this.envelope.getOriginalGeometry();
+  }
+
+  @Override
+  public int getBoundaryDimension() {
+    return 2;
+  }
+
+  @Override
   public Envelope getEnvelopeInternal() {
     if (this.envelope == null) {
       this.envelope = new Envelope(minX, maxX, minY, maxY);
     }
     return this.envelope;
   }
-
-
 }

@@ -7,7 +7,7 @@
 /dependency-reduced-pom.xml
 /bin/
 /doc/
-/conf/
+/config/
 /log/
 *.json
 *.geojson

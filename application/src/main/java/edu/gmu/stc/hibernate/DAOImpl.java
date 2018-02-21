@@ -53,6 +53,7 @@ public class DAOImpl<T> implements DAO {
 
         try {
             result = session.get(type, name);
+            session.close();
         } catch(Exception e) {
             System.err.println("Error when attempting to retrieve data via name: " + e);
             e.printStackTrace();
@@ -60,8 +61,6 @@ public class DAOImpl<T> implements DAO {
         }
         return result;
     }
-
-
 
     public Object findById(String tableName, Integer id) {
         if(!isSetup()) {
@@ -72,6 +71,7 @@ public class DAOImpl<T> implements DAO {
 
         try {
             result = session.get(tableName, id);
+            session.close();
         } catch(Exception e) {
             System.err.println("Error when attempting to retrieve data via ID: " + e);
             e.printStackTrace();
@@ -94,6 +94,7 @@ public class DAOImpl<T> implements DAO {
             Root<T> siaMetadataRoot = criteriaQuery.from(type);
             criteriaQuery.select(siaMetadataRoot);
             objects = session.createQuery(criteriaQuery).getResultList();
+            session.close();
         } catch(Exception e) {
             System.err.println("Error when attempting to retrieve data via type: " + e);
             e.printStackTrace();
@@ -114,6 +115,7 @@ public class DAOImpl<T> implements DAO {
       try {
         session.beginTransaction();
         objects = session.createSQLQuery("SELECT * " + hqlQuery).addEntity(cls).list();
+        session.close();
       } catch(Exception e) {
         System.err.println("Error when attempting to retrieve data via query: " + e);
         e.printStackTrace();
@@ -135,6 +137,7 @@ public class DAOImpl<T> implements DAO {
                 session.save(object);
             }
             session.getTransaction().commit();
+            session.close();
         } catch(Exception e) {
             System.err.println("Unable to insert list into database: " + e);
             e.printStackTrace();
@@ -151,6 +154,7 @@ public class DAOImpl<T> implements DAO {
             session.beginTransaction();
             session.save(object);
             session.getTransaction().commit();
+            session.close();
         } catch(Exception e) {
             System.err.println("Unable to insert into database: " + e);
             e.printStackTrace();
@@ -166,6 +170,7 @@ public class DAOImpl<T> implements DAO {
             session.beginTransaction();
             session.save(tableName, object);
             session.getTransaction().commit();
+            session.close();
         } catch(Exception e) {
             session.getTransaction().rollback();
         }
@@ -188,12 +193,11 @@ public class DAOImpl<T> implements DAO {
           session.save(tableName, objectList.next());
         }
         session.getTransaction().commit();
+        session.close();
       } catch(Exception e) {
         session.getTransaction().rollback();
       }
     }
-
-
 
     public void update(Object object) {
         if(!isSetup()) {
@@ -203,6 +207,7 @@ public class DAOImpl<T> implements DAO {
         try {
             session.beginTransaction();
             session.update(object);
+            session.close();
         } catch(Exception e) {
             session.getTransaction().rollback();
         }
@@ -216,6 +221,7 @@ public class DAOImpl<T> implements DAO {
         try {
             session.beginTransaction();
             session.delete(name);
+            session.close();
         } catch(Exception e) {
             session.getTransaction().rollback();
         }

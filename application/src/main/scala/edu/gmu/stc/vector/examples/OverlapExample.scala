@@ -1,9 +1,10 @@
 package edu.gmu.stc.vector.examples
 
 import edu.gmu.stc.vector.operation.Overlap.intersect
-import edu.gmu.stc.vector.operation.TaskUtil.show_timing
+import edu.gmu.stc.vector.operation.OperUtil.show_timing
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.SparkSession
+import org.datasyslab.geospark.formatMapper.shapefileParser.ShapefileReader
 import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
 
 /**
@@ -32,9 +33,12 @@ object OverlapExample extends App {
   val shpFile2 = resourceFolder + "Soil_Type_by_Slope_DC"
   val outputFile = resourceFolder + "dc_overlayMap_intersect_" + System.currentTimeMillis() + ".geojson"
 
-  val numPartition = 12
+  val numPartition = 24
 
-  val runtime = show_timing(intersect(sparkSession, shpFile1, shpFile2, numPartition, outputFile))
+  /*val plg1RDD = ShapefileReader.readToPolygonRDD(sparkSession.sparkContext, shpFile1)
+  println(plg1RDD.rawSpatialRDD.count())*/
+
+  val runtime = show_timing(intersect(sparkSession, "RTREE", "QUADTREE", shpFile1, shpFile2, numPartition, outputFile))
   LOG.info(s"*** Runtime is : $runtime")
   LOG.info("Finish GeoSpark Overlap Spatial Analysis Example")
 

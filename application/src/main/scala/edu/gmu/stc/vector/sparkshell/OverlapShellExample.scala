@@ -1,7 +1,7 @@
 package edu.gmu.stc.vector.sparkshell
 
 import edu.gmu.stc.vector.operation.Overlap.intersect
-import edu.gmu.stc.vector.operation.TaskUtil.show_timing
+import edu.gmu.stc.vector.operation.OperUtil.show_timing
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.datasyslab.geosparksql.utils.GeoSparkSQLRegistrator
@@ -23,5 +23,5 @@ object OverlapShellExample {
 
   val outputFile: String = resourceFolder + "dc_overlayMap_intersect_" + System.currentTimeMillis() + ".geojson"
   val numPartition = 24
-  val runtime: Long = show_timing(intersect(sparkSession, shpFile1, shpFile2, numPartition, outputFile))
+  val runtime: Long = show_timing(intersect(sparkSession, "KDBTREE", "QUADTREE", shpFile1, shpFile2, numPartition, outputFile))
 }
