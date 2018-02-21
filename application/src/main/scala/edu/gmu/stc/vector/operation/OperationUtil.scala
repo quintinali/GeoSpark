@@ -31,7 +31,12 @@ object OperationUtil {
     val conf = new Configuration()
     val fs = FileSystem.get(conf)
     val src = new Path(hdfsPath)
-    val dest = new Path(localPath)
+
+    val dest = new Path("file://" + localPath)
+
+    if (fs.exists(dest)) {
+      fs.delete(dest, true)
+    }
 
     fs.copyToLocalFile(src, dest)
   }
