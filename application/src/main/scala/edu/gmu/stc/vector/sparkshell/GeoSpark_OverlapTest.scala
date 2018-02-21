@@ -1,7 +1,7 @@
 package edu.gmu.stc.vector.sparkshell
 
 import edu.gmu.stc.vector.operation.Overlap.intersect
-import edu.gmu.stc.vector.operation.OperUtil.show_timing
+import edu.gmu.stc.vector.operation.OperationUtil.show_timing
 import edu.gmu.stc.vector.sparkshell.OverlapShellExample.sc
 import edu.gmu.stc.vector.sparkshell.STC_OverlapTest.logError
 import org.apache.spark.internal.Logging
@@ -45,6 +45,7 @@ object GeoSpark_OverlapTest extends Logging{
 
     val numPartition: Int = args(3).toInt
     val outputFile: String = resourceFolder + "%s_%s_overlap_%s".format(args(1), args(2), args(4)) + ".geojson"
+
 
     val runtime: Long = show_timing(intersect(sparkSession, args(4), args(5), shpFile1, shpFile2, numPartition, outputFile))
     println(s"Runtime is : $runtime seconds")

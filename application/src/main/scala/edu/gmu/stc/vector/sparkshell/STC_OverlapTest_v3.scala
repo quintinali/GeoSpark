@@ -1,7 +1,7 @@
 package edu.gmu.stc.vector.sparkshell
 
 import edu.gmu.stc.config.ConfigParameter
-import edu.gmu.stc.vector.operation.OperUtil
+import edu.gmu.stc.vector.operation.OperationUtil
 import edu.gmu.stc.vector.rdd.{GeometryRDD, ShapeFileMetaRDD}
 import edu.gmu.stc.vector.serde.VectorKryoRegistrator
 import org.apache.hadoop.conf.Configuration
@@ -64,7 +64,7 @@ object STC_OverlapTest_v3 extends Logging{
     geometryRDD1.indexPartition(indexType)
     geometryRDD1.cache()
 
-    println("*************Counting GeometryRDD1 Time: " + OperUtil.show_timing(geometryRDD1.getGeometryRDD.count()))
+    println("*************Counting GeometryRDD1 Time: " + OperationUtil.show_timing(geometryRDD1.getGeometryRDD.count()))
 
     val partitionNum1 = geometryRDD1.getGeometryRDD.mapPartitionsWithIndex({
       case (index, itor) => {
@@ -87,7 +87,7 @@ object STC_OverlapTest_v3 extends Logging{
     geometryRDD2.partition(shapeFileMetaRDD1.getPartitioner)
     geometryRDD2.cache()
 
-    println("*************Counting GeometryRDD2 Time: " + OperUtil.show_timing(geometryRDD2.getGeometryRDD.count()))
+    println("*************Counting GeometryRDD2 Time: " + OperationUtil.show_timing(geometryRDD2.getGeometryRDD.count()))
 
 
     val partitionNum2 = geometryRDD2.getGeometryRDD.mapPartitionsWithIndex({

@@ -3,7 +3,7 @@ package edu.gmu.stc.vector.rdd
 import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.index.SpatialIndex
 import edu.gmu.stc.hibernate.{DAOImpl, HibernateUtil, PhysicalNameStrategyImpl}
-import edu.gmu.stc.vector.operation.OperUtil
+import edu.gmu.stc.vector.operation.OperationUtil
 import edu.gmu.stc.vector.parition.PartitionUtil
 import edu.gmu.stc.vector.rdd.index.IndexOperator
 import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta
@@ -216,7 +216,7 @@ class ShapeFileMetaRDD (sc: SparkContext, @transient conf: Configuration) extend
   def spatialJoin(shapeFileMetaRDD2: ShapeFileMetaRDD, partitionNum: Int): RDD[(ShapeFileMeta, ShapeFileMeta)] = {
     this.indexedShapeFileMetaRDD
       .zipPartitions(shapeFileMetaRDD2.getShapeFileMetaRDD)(IndexOperator.spatialJoin)
-      .map(tuple => (OperUtil.getUniqID(tuple._1.getIndex, tuple._2.getIndex), tuple))
+      .map(tuple => (OperationUtil.getUniqID(tuple._1.getIndex, tuple._2.getIndex), tuple))
       .reduceByKey((tuple1:(ShapeFileMeta, ShapeFileMeta), tuple2: (ShapeFileMeta, ShapeFileMeta)) => tuple1)
       //.sortByKey(ascending = true, partitionNum)
       .map(tuple => tuple._2)
