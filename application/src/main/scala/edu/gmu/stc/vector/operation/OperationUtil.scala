@@ -30,12 +30,14 @@ object OperationUtil {
   def hdfsToLocal(hdfsPath: String, localPath: String) = {
     val conf = new Configuration()
     val fs = FileSystem.get(conf)
+    val localFs = FileSystem.getLocal(conf)
+
     val src = new Path(hdfsPath)
 
-    val dest = new Path("file://" + localPath)
+    val dest = new Path(localPath)
 
-    if (fs.exists(dest)) {
-      fs.delete(dest, true)
+    if (localFs.exists(dest)) {
+      localFs.delete(dest, true)
     }
 
     fs.copyToLocalFile(src, dest)
