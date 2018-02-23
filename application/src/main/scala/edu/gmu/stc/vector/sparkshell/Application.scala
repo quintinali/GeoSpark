@@ -19,7 +19,7 @@ object Application extends Logging{
   val sqlContext = new SQLContext(sc)
   val sparkSession: SparkSession = sqlContext.sparkSession
 
-  def spatialOperation(args: Array[String]): String = {
+  def spatialOperation(args: Array[String], sc: SparkContext, sparkSession: SparkSession): String = {
     if (args.length < 1) {
       logError("Please input the arguments")
     }
@@ -43,6 +43,12 @@ object Application extends Logging{
         "Please input the right arguments for operations"
       }
     }
+  }
+
+  def main(args: Array[String]): Unit = {
+    val args_new = Array("STC_OverlapTest_V1", "/Users/feihu/Documents/GitHub/GeoSpark/config/conf_dc.xml", "240", "KDBTREE", "RTREE", "/Users/feihu/Documents/GitHub/GeoSpark/shp_dc_test.shp")
+    val output = Application.spatialOperation(args_new, sc, sparkSession)
+    println(output)
   }
 
 }
