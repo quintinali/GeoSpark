@@ -30,6 +30,8 @@ object OperationUtil {
     "svr-A7-C-U6" -> "10.192.21.133",
     "localhost" -> "127.0.0.1")
 
+  val HDFS_MASTER_NODE = "10.192.21.148"
+
   /**
     * monitor the runtime for the task/function
     *
@@ -92,7 +94,7 @@ object OperationUtil {
       val randomHost = hosts(random.nextInt(hosts.size))
       val hostIP = hostIPMap.getOrElse(randomHost, "127.0.0.1")
 
-      WEBHDFS_GET.format(hostIP, path.toUri.getRawPath, hostIP)
+      WEBHDFS_GET.format(hostIP, path.toUri.getRawPath, HDFS_MASTER_NODE)
     })
 
     hdfsUrls.mkString(",")
