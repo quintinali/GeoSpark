@@ -9,16 +9,6 @@ import org.apache.spark.sql.{SQLContext, SparkSession}
   */
 object Application extends Logging{
 
-  val sparkConf = new SparkConf().setAppName("Application")
-
-  if (System.getProperty("os.name").equals("Mac OS X")) {
-    sparkConf.setMaster("local[6]")
-  }
-
-  val sc = new SparkContext(sparkConf)
-  val sqlContext = new SQLContext(sc)
-  val sparkSession: SparkSession = sqlContext.sparkSession
-
   def spatialOperation(args: Array[String], sc: SparkContext, sparkSession: SparkSession): String = {
     if (args.length < 1) {
       logError("Please input the arguments")
@@ -46,8 +36,20 @@ object Application extends Logging{
   }
 
   def main(args: Array[String]): Unit = {
+    val sparkConf = new SparkConf().setAppName("Application")
+
+    if (System.getProperty("os.name").equals("Mac OS X")) {
+      sparkConf.setMaster("local[6]")
+    }
+
+    val sc = new SparkContext(sparkConf)
+    val sqlContext = new SQLContext(sc)
+    val sparkSession: SparkSession = sqlContext.sparkSession
+
     val args_new = Array("STC_OverlapTest_V1", "/Users/feihu/Documents/GitHub/GeoSpark/config/conf_dc.xml", "240", "KDBTREE", "RTREE", "/Users/feihu/Documents/GitHub/GeoSpark/shp_dc_test.shp")
-    val output = Application.spatialOperation(args_new, sc, sparkSession)
+    val args_1 = Array("GeoSpark_Overlap", "/Users/feihu/Documents/GitHub/GeoSpark/application/src/main/resources/data/Washington_DC", "Impervious_Surface_2015", "Soil_Type_by_Slope", "240", "KDBTREE", "RTREE")
+
+    val output = Application.spatialOperation(args_1, sc, sparkSession)
     println(output)
   }
 
