@@ -16,9 +16,13 @@ import org.geotools.data.Transaction;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.geotools.referencing.factory.ReferencingObjectFactory;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.cs.CoordinateSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -133,8 +137,10 @@ public class GeometryReaderUtil {
     params.put(ShapefileDataStoreFactory.URLP.key, file.toURI().toURL());
     ShapefileDataStore ds = (ShapefileDataStore) new ShapefileDataStoreFactory().createNewDataStore(params);
 
+    System.out.println("SRID: " + geometries.get(0).getSRID());
+
     SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
-    tb.setCRS(DefaultGeographicCRS.WGS84);
+    //tb.setCRS(DefaultGeographicCRS.WGS84);
     tb.setName("shapefile");
     tb.add("the_geom", Polygon.class);
     tb.add("outPolyID", Long.class);
@@ -142,6 +148,10 @@ public class GeometryReaderUtil {
     tb.add("IDPoly2", Long.class);
     ds.createSchema(tb.buildFeatureType());
     ds.setCharset(Charset.forName("GBK"));
+
+    ReferencingObjectFactory refFactory = new ReferencingObjectFactory();
+
+
 
     FeatureWriter<SimpleFeatureType, SimpleFeature> writer = ds.getFeatureWriter(ds.getTypeNames()[0], Transaction.AUTO_COMMIT);
 

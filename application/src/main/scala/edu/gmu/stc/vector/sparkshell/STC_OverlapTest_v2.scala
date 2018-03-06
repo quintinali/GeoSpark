@@ -113,6 +113,7 @@ object STC_OverlapTest_v2 extends Logging{
     val sparkConf = new SparkConf().setAppName("%s_%s_%s_%s".format("STC_OverlapTest_v2", args(1), args(2), args(3)))
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", classOf[VectorKryoRegistrator].getName)
+      .set("spark.kryoserializer.buffer.max", "1550m")
 
     if (System.getProperty("os.name").equals("Mac OS X")) {
       sparkConf.setMaster("local[6]")
