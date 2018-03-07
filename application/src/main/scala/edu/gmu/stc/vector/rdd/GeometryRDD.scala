@@ -92,9 +92,10 @@ class GeometryRDD extends Logging{
       .map({case (g1, g2) => {
         (g1.hashCode() + "_" + g2.hashCode(), (g1, g2))
       }})
-      .distinct()
+      .reduceByKey((v1, v2) => v1)
+        .map(tuple => tuple._2)
       .repartition(partitionNum)
-      .map({case(id, (g1, g2)) => {
+      .map({case(g1, g2) => {
         g1.intersection(g2)
       }})
       .filter(g => !g.isEmpty)
