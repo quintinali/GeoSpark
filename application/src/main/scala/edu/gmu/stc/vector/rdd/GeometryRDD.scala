@@ -51,7 +51,7 @@ class GeometryRDD extends Logging{
 
     joinRDD = joinRDD.cache()
 
-    logInfo("************** Number of elements in JoinedRDD: %d".format(joinRDD.count()))
+    //logInfo("************** Number of elements in JoinedRDD: %d".format(joinRDD.count()))
 
     val t1 = System.currentTimeMillis()
 
@@ -59,7 +59,7 @@ class GeometryRDD extends Logging{
 
     val t2 = System.currentTimeMillis()
 
-    logInfo("******** Intersection takes: %d".format((t2 - t1)/1000))
+    //logInfo("******** Intersection takes: %d".format((t2 - t1)/1000))
   }
 
   def getGeometryRDD: RDD[Geometry] = this.geometryRDD
