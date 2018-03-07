@@ -34,6 +34,7 @@ class VectorKryoRegistrator extends KryoRegistrator{
     kryo.register(classOf[Quadtree], indexSerializer)
     kryo.register(classOf[STRtree], indexSerializer)
     kryo.register(classOf[SpatialIndex], indexSerializer)
+    kryo.register(classOf[Tuple2[Polygon, Polygon]])
 
     //kryo.register(classOf[Configuration], new HadoopConfigurationSerde)
   }

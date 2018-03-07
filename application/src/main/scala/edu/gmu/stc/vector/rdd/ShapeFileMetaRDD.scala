@@ -98,6 +98,7 @@ class ShapeFileMetaRDD (sc: SparkContext, @transient conf: Configuration) extend
     val hql = ShapeFileMeta.getSQLForOverlappedRows(tableName, minX, minY, maxX, maxY)
 
     val shapeFileMetaList = dao.findByQuery(hql, classOf[ShapeFileMeta]).asScala
+    logInfo("**** Number of shapeFile meta is %d".format(shapeFileMetaList.size))
     val envelopes = shapeFileMetaList.map(shapeFileMeta => shapeFileMeta.getEnvelopeInternal)
 
     logInfo("Number of queried shapefile metas is : " + envelopes.size)
