@@ -99,6 +99,10 @@ class GeometryRDD extends Logging{
         g1.intersection(g2)
       }})
       .filter(g => !g.isEmpty)
+      .map(g => (g.hashCode(), g))
+      .reduceByKey({
+        case (g1, g2) => g1
+      }).map(_._2)
 
     geometryRDD
   }
