@@ -1,5 +1,7 @@
 package edu.gmu.stc.vector.sparkshell
 
+import java.nio.file.{Files, Paths}
+
 import edu.gmu.stc.config.ConfigParameter
 import edu.gmu.stc.vector.examples.ShapeFileMetaTest._
 import edu.gmu.stc.vector.rdd.{GeometryRDD, ShapeFileMetaRDD}
@@ -11,6 +13,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 import org.datasyslab.geospark.enums.{GridType, IndexType}
+import scala.reflect.io.{Directory, File}
 
 /**
   * Created by Fei Hu on 1/29/18.
@@ -24,10 +27,21 @@ object STC_OverlapTest_V1 extends Logging{
         "\n \t 2) numPartition: the number of partitions" +
         "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +
         "\n \t 4) indexType: the index type for each partition, e.g. QUADTREE, RTREE" +
-        "\n \t 5) output file path: the file path for geojson output")
+        "\n \t 5) output file path: the file path for output" +
+        "\n \t 6) output file format: the file format, either geojson or shapefile")
 
       return "Please input the right arguments"
     }
+
+    val outputFileDir = args(4)
+    var bexist = Files.exists(Paths.get(outputFileDir))
+    if(bexist){
+      return "The output file directory already exists, please set a new one"
+    }
+
+    val path: scala.reflect.io.Path = scala.reflect.io.Path (outputFileDir)
+    val folder = path.createDirectory(failIfExists=false)
+    val folderName = folder.name
 
     sc.getConf
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
@@ -66,14 +80,17 @@ object STC_OverlapTest_V1 extends Logging{
     geometryRDD.intersect(shapeFileMetaRDD1, shapeFileMetaRDD2, partitionNum)
     geometryRDD.cache()
 
-    val filePath = args(4)
-    if (filePath.endsWith("shp")) {
-      geometryRDD.saveAsShapefile(filePath)
+    val outputFileFormat = args(5)
+    var outputFilePath = ""
+    if (outputFileFormat.equals("shp")) {
+      outputFilePath = folder.path + "/" + folderName + ".shp"
+      geometryRDD.saveAsShapefile(outputFilePath)
     } else {
-      geometryRDD.saveAsGeoJSON(filePath)
+      outputFilePath = folder.path + "/" + folderName + ".geojson"
+      geometryRDD.saveAsGeoJSON(outputFilePath)
     }
-
-    filePath
+    //println("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
+    outputFilePath
   }
 
   def main(args: Array[String]): Unit = {
@@ -146,5 +163,4 @@ object STC_OverlapTest_V1 extends Logging{
     }
     println("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
   }
-
 }

@@ -1,5 +1,8 @@
 package edu.gmu.stc.vector.operation;
 
+import edu.gmu.stc.config.ConfigParameter;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.store.ContentFeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -67,12 +70,10 @@ public class MapUtil {
 		return mapInfo;
 	}
 
-	public static String publishWMS(String shpFolder){
-		//configaration
-		String remoteDir = "/usr/share/geoserver/data_dir/data/";
-		String hostname = "199.26.254.146";
-		String password = "cisc255b";
-		String username = "root";
+	public static String publishWMS(String shpFolder, String cfgPath){
+		//load configaration
+		Configuration hConf = new Configuration();
+		hConf.addResource(new Path(cfgPath));
 
 		File curDir = new File(shpFolder);
 		String[] files = curDir.list();
@@ -89,57 +90,34 @@ public class MapUtil {
 		Map<String, String> mapInfo = MapUtil.getShpInfo(shpFilePath);
 		String code = mapInfo.get("code");
 		String bbox = mapInfo.get("bbox");
+		System.out.println("espg code:" + code);
+		System.out.println("bbox:" + bbox);
 
 		//copy folder to remote machine
+		String remoteDir = hConf.get(ConfigParameter.GEOSERVER_DATA_DIRECTORY);
+		String hostname = hConf.get(ConfigParameter.GEOSERVER_HOST_IP);
+		String username = hConf.get(ConfigParameter.GEOSERVER_HOST_USER);
+		String password = hConf.get(ConfigParameter.GEOSERVER_HOST_PWD);
 		String remotePath = MapUtil.localToRemote(shpFolder, hostname, username, password,  remoteDir);
+		System.out.println("copy local shp file to :" + hostname + ":" + remotePath);
 
 		//publish map
-		Geoclient client = new Geoclient();
+		String restURL = hConf.get(ConfigParameter.GEOSERVER_RESTURL);
+		String restUser = hConf.get(ConfigParameter.GEOSERVER_RESTUSER);
+		String restPWD = hConf.get(ConfigParameter.GEOSERVER_RESTPWD);
+		Geoclient client = new Geoclient(restURL, restUser, restPWD);
 		String workspace = "mapWorkspace";
 		String dataStore = shpFileName + Math.random();
 		remotePath = "file:///" + remotePath + shpFileName;
 		String datasetName = shpFileName.replace(".shp", "");
 		String publishedUrl = client.publishShapefile(workspace, dataStore, datasetName, remotePath, code, bbox);
-		//System.out.println(publishedUrl);
+		System.out.println("publish file: " + workspace + "| " + dataStore +  "| " +  datasetName + "| " + remotePath);
 
 		return publishedUrl;
 	}
 
 	public static void main( String[] args ) throws IOException
 	{
-		/***test copy local file to remote ****/
-		MapUtil util = new MapUtil();
-		String hostname = "199.26.254.146";
-		String password = "cisc255b";
-		String username = "root";
-		String localFile = "D:\\python workspace\\data\\dc-soil-type\\";
-		String remoteDir = "/usr/share/geoserver/data_dir/data/";
-		//String remotePath = util.localToRemote(localFile, hostname, username, password, remoteDir);
-		//System.out.print(remotePath);
-		//String remotePath = "/usr/share/geoserver/data_dir/data/dc-soil-type/";
-		//util.getShpInfo("D:\\python workspace\\data\\dc-surface\\Impervious_Surface_2015.shp");
-
-		/*
-		Geoclient client = new Geoclient();
-		String bbox = "-77.11754873964377,38.792343324528275,-76.90946841778161,38.99561050732789";
-		String code = "EPSG:4326";
-		String workspace = "yun";
-		String shpFileName = "Soil_Type_by_Slope";
-		remotePath = "file:////usr/share/geoserver/data_dir/data/Soil_Type_by_Slope/Soil_Type_by_Slope.shp";
-		String dataStore = shpFileName + (int)Math.random();
-		System.out.println(dataStore);
-		String publishedUrl = client.publishShapefile(workspace, dataStore, shpFileName, remotePath, code, bbox);
-
-		if(publishedUrl.equals("")){
-			System.out.println("can't publish map");
-		}else{
-			System.out.println(publishedUrl);
-		}
-*/
-		//util.publishWMS("D:\\python workspace\\data\\Soil_Type_by_Slope\\");
-		MapUtil.publishWMS("D:\\python workspace\\data\\Soil_Type_by_Slope\\");
-
-
-		//"http://http://199.26.254.146:8080/geoserver/yun/wms?service=WMS&version=1.1.0&request=GetMap&layers=yun:Soil_Type_by_Slope0.15356805741107682&styles=&bbox=-77.11754873964377,38.792343324528275,-76.90946841778161,38.99561050732789&width=506&height=768&srs=EPSG:4326&format=application/openlayers";
+		MapUtil.publishWMS("D:\\python workspace\\data\\Soil_Type_by_Slope\\", "D:\\geosparkWorkspace\\GeoSpark\\config\\config.xml");
 	}
 }

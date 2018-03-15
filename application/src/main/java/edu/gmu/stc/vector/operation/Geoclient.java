@@ -19,19 +19,22 @@ import it.geosolutions.geoserver.rest.GeoServerRESTReader;
  */
 public class Geoclient {
 
-  private final String RESTURL  = "http://199.26.254.146:8080/geoserver";
-  private final String RESTUSER = "admin";
-  private final String RESTPW   = "geoserver";
+  private String restURL/*= "http://199.26.254.146:8080/geoserver"*/;
+    private String restUser;
+    private String restPwd;
   GeoServerRESTReader reader;
   GeoServerRESTPublisher publisher;
 
-  public Geoclient() {
+  public Geoclient(String restURL, String restUser, String restPwd) {
+    this.restURL = restURL;
+    this.restUser = restUser;
+    this.restPwd = restPwd;
     try {
-      reader = new GeoServerRESTReader(RESTURL, RESTUSER, RESTPW);
+      reader = new GeoServerRESTReader(restURL, restUser, restPwd);
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
-    publisher = new GeoServerRESTPublisher(RESTURL, RESTUSER, RESTPW);
+    publisher = new GeoServerRESTPublisher(restURL, restUser, restPwd);
   }
 
   public boolean createWorkspace(String workspace_name)
@@ -49,8 +52,7 @@ public class Geoclient {
   {
     String publishedUrl = "";
     boolean bPublished = false;
-
-    this.createWorkspace(workspace_name);
+    //this.createWorkspace(workspace_name);
 
     URI uri;
     try {
@@ -59,30 +61,19 @@ public class Geoclient {
               UploadMethod.EXTERNAL, uri, proj, null);
     } catch (Exception e) {
       e.printStackTrace();
+      publishedUrl = e.getMessage();
     }
 
     if(bPublished){
-      publishedUrl = this.RESTURL  + "/" + workspace_name +"/wms?service=WMS&version=1.1.0&request=GetMap&layers=" + workspace_name + ":" + datasetname +"&styles=&bbox=" + bbox + "&width=506&height=768&srs=" + proj + "&format=application/openlayers";
+      publishedUrl = this.restURL  + "/" + workspace_name +"/wms?service=WMS&version=1.1.0&request=GetMap&layers=" + workspace_name + ":" + datasetname +"&styles=&bbox=" + bbox + "&width=506&height=768&srs=" + proj + "&format=application/openlayers";
+    }else{
+      publishedUrl = "Failed to publish map." + publishedUrl;
     }
     return publishedUrl;
   }
 
   public static void main(String[] args) throws URISyntaxException {
-    Geoclient client = new Geoclient();
-    //System.out.println(client.createWorkspace("yun"));
-    System.out.println(client.publishShapefile("yun", "yuntest", "nyc_roads", "file:////usr/share/geoserver/data_dir/data/nyc_roads/nyc_roads.shp", "EPSG:2908", ""));
-    //File zipFile = new File("/Users/yjiang/Downloads/nyc_roads.zip");
-//    URI uri = new URI("file:///home/data/nyc_roads/nyc_roads.shp");
-//    try {
-//      boolean published = client.publisher.publishShpCollection("javatest", "myStore", uri);
-//      System.out.println(published);
-//    } catch (FileNotFoundException e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    } catch (IllegalArgumentException e) {
-//      // TODO Auto-generated catch block
-//      e.printStackTrace();
-//    }
+      
   }
 
 }

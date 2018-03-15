@@ -17,4 +17,12 @@ public class ConfigParameter {
   public static final String INPUT_DIR_PATH = "mapred.input.dir";
   public static final String SHAPEFILE_INDEX_TABLES = "shapefile.index.tablenames";
 
+  //Geoserver
+  public static final String GEOSERVER_HOST_IP = "geoserver.host.ip";
+  public static final String GEOSERVER_HOST_USER = "geoserver.host.user";
+  public static final String GEOSERVER_HOST_PWD = "geoserver.host.password";
+  public static final String GEOSERVER_DATA_DIRECTORY = "geoserver.data.directory";
+  public static final String GEOSERVER_RESTURL = "geoserver.resturl";
+  public static final String GEOSERVER_RESTUSER= "geoserver.restuser";
+  public static final String GEOSERVER_RESTPWD= "geoserver.restpassword";
 }
