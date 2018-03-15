@@ -18,13 +18,14 @@ import org.datasyslab.geospark.enums.{GridType, IndexType}
 object STC_OverlapTest_v2 extends Logging{
 
   def overlap(args: Array[String], sc: SparkContext, spark: SparkSession): String = {
-    if (args.length != 5) {
+    if (args.length != 6) {
       logError("You input "+ args.length + "arguments: " + args.mkString(" ") + ", but it requires 5 arguments: " +
         "\n \t 1)configFilePath: this file path for the configuration file path" +
         "\n \t 2) numPartition: the number of partitions" +
         "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +
         "\n \t 4) indexType: the index type for each partition, e.g. QUADTREE, RTREE" +
-        "\n \t 5) output file path: the file path for geojson output")
+        "\n \t 5) output file path: the file path for geojson output" +
+        "\n \t 6) crs: coordinate reference system")
 
       return ""
     }
@@ -86,8 +87,9 @@ object STC_OverlapTest_v2 extends Logging{
     geometryRDD.cache()
 
     val outputFilePath = args(4)
+    val crs = args(5)
     if (outputFilePath.endsWith("shp")) {
-      geometryRDD.saveAsShapefile(outputFilePath)
+      geometryRDD.saveAsShapefile(outputFilePath, crs)
     } else {
       geometryRDD.saveAsGeoJSON(outputFilePath)
     }
@@ -97,13 +99,14 @@ object STC_OverlapTest_v2 extends Logging{
 
   def main(args: Array[String]): Unit = {
 
-    if (args.length != 5) {
+    if (args.length != 6) {
       logError("You input "+ args.length + "arguments: " + args.mkString(" ") + ", but it requires 5 arguments: " +
         "\n \t 1)configFilePath: this file path for the configuration file path" +
         "\n \t 2) numPartition: the number of partitions" +
         "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +
         "\n \t 4) indexType: the index type for each partition, e.g. QUADTREE, RTREE" +
-        "\n \t 5) output file path: the file path for geojson output")
+        "\n \t 5) output file path: the file path for geojson output" +
+        "\n \t 6) crs: coordinate reference system")
 
       return
     }
@@ -192,8 +195,9 @@ object STC_OverlapTest_v2 extends Logging{
     geometryRDD.cache()
 
     val filePath = args(4)
+    val crs = args(5)
     if (filePath.endsWith("shp")) {
-      geometryRDD.saveAsShapefile(filePath)
+      geometryRDD.saveAsShapefile(filePath, crs)
     } else {
       geometryRDD.saveAsGeoJSON(filePath)
     }
