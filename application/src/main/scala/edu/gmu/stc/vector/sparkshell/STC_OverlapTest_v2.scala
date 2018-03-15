@@ -40,10 +40,6 @@ object STC_OverlapTest_v2 extends Logging{
       return "The output file directory already exists, please set a new one"
     }
 
-    val path: scala.reflect.io.Path = scala.reflect.io.Path (outputFileDir)
-    val folder = path.createDirectory(failIfExists=false)
-    val folderName = folder.name
-
     sc.getConf
       .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .set("spark.kryo.registrator", classOf[VectorKryoRegistrator].getName)
@@ -99,6 +95,10 @@ object STC_OverlapTest_v2 extends Logging{
 
     val geometryRDD = geometryRDD1.intersect(geometryRDD2)
     geometryRDD.cache()
+
+    val path: scala.reflect.io.Path = scala.reflect.io.Path (outputFileDir)
+    val folder = path.createDirectory(failIfExists=false)
+    val folderName = folder.name
 
     val outputFileFormat = args(5)
     val crs = args(6)
