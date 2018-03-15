@@ -22,7 +22,8 @@ object STC_OverlapTest_v3 extends Logging{
         "\n \t 2) numPartition: the number of partitions" +
         "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +
         "\n \t 4) indexType: the index type for each partition, e.g. QUADTREE, RTREE" +
-        "\n \t 5) output file path: the file path for geojson output")
+        "\n \t 5) output file path: the file path for geojson output" +
+        "\n \t 6) crs: coordinate reference system")
 
       return
     }
@@ -113,8 +114,9 @@ object STC_OverlapTest_v3 extends Logging{
     println("******** Intersection time: " + (endTime - startTime)/1000000)
 
     val filePath = args(4)
+    val crs = args(5)
     if (filePath.endsWith("shp")) {
-      geometryRDD.saveAsShapefile(filePath)
+      geometryRDD.saveAsShapefile(filePath, crs)
     } else {
       geometryRDD.saveAsGeoJSON(filePath)
     }

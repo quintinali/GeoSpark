@@ -105,16 +105,18 @@ public class MapUtil {
 		String restURL = hConf.get(ConfigParameter.GEOSERVER_RESTURL);
 		String restUser = hConf.get(ConfigParameter.GEOSERVER_RESTUSER);
 		String restPWD = hConf.get(ConfigParameter.GEOSERVER_RESTPWD);
+		String workspace = hConf.get(ConfigParameter.GEOSERVER_WORKSPACE);
 		Geoclient client = new Geoclient(restURL, restUser, restPWD);
-		String workspace = "mapWorkspace";
 		String dataStore = shpFileName + Math.random();
 		remotePath = "file:///" + remotePath + shpFileName;
 		String datasetName = shpFileName.replace(".shp", "");
 		String publishedUrl = client.publishShapefile(workspace, dataStore, datasetName, remotePath, code, bbox);
+
 		System.out.println("publish file: " + workspace + "| " + dataStore +  "| " +  datasetName + "| " + remotePath);
 
 		return publishedUrl;
 	}
+
 
 	public static void main( String[] args ) throws IOException
 	{

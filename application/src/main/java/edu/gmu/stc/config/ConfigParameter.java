@@ -25,4 +25,5 @@ public class ConfigParameter {
   public static final String GEOSERVER_RESTURL = "geoserver.resturl";
   public static final String GEOSERVER_RESTUSER= "geoserver.restuser";
   public static final String GEOSERVER_RESTPWD= "geoserver.restpassword";
+    public static final String GEOSERVER_WORKSPACE= "geoserver.workspace";
 }

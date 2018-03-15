@@ -50,8 +50,8 @@ public class Geoclient {
   public String publishShapefile(String workspace_name, String data_store_name, String datasetname,
                                   String remote_data_path, String proj, String bbox)
   {
-    String publishedUrl = "";
     boolean bPublished = false;
+    String publishedUrl = "";
     //this.createWorkspace(workspace_name);
 
     URI uri;
@@ -65,8 +65,8 @@ public class Geoclient {
     }
 
     if(bPublished){
-      publishedUrl = this.restURL  + "/" + workspace_name +"/wms?service=WMS&version=1.1.0&request=GetMap&layers=" + workspace_name + ":" + datasetname +"&styles=&bbox=" + bbox + "&width=506&height=768&srs=" + proj + "&format=application/openlayers";
-    }else{
+      publishedUrl = this.restURL  + "/" + workspace_name +"/wms&service=WMS&version=1.1.0&request=GetMap&layers=" + workspace_name + ":" + datasetname +"&styles=&bbox=" + bbox + "&width=506&height=768&srs=" + proj + "&format=application/openlayers";
+     }else{
       publishedUrl = "Failed to publish map." + publishedUrl;
     }
     return publishedUrl;
