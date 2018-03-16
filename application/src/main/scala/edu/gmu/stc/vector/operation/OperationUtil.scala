@@ -100,9 +100,13 @@ object OperationUtil {
     hdfsUrls.mkString(",")
   }
 
-  def main(args: Array[String]): Unit = {
-    OperationUtil.hdfsToLocal("/Users/feihu/Documents/GitHub/GeoSpark/config", "/Users/feihu/Desktop/111/111/111/")
-    println(OperationUtil.getWebHDFSUrl("/Users/feihu/Desktop", "Screen Shot"))
+  def publishWMS(shpFolder: String, cfgPath: String): String = {
+    val url = MapUtil.publishWMS(shpFolder, cfgPath)
+    url
   }
 
+  def main(args: Array[String]): Unit = {
+    println(OperationUtil.publishWMS("/home/yun/test","/home/yun/GeoSpark/config/conf_dc.xml"))
+    //println(OperationUtil.publishWMS("D:\\python workspace\\data\\Soil_Type_by_Slope","D:\\geosparkWorkspace\\GeoSpark\\config\\conf.xml"))
+  }
 }
