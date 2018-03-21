@@ -126,7 +126,10 @@ class GeometryRDD extends Logging{
   }
 
   def saveAsShapefile(filepath: String, crs: String): Unit = {
+    val t = System.currentTimeMillis()
     val polygons = this.geometryRDD.collect().toList.asJava
+    println("************** collect overlap polygon time: " + (System.currentTimeMillis() - t)/1000000)
+
     GeometryReaderUtil.saveAsShapefile(filepath, polygons, crs)
   }
 

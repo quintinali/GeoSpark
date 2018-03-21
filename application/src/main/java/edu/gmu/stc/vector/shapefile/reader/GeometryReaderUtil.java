@@ -135,6 +135,7 @@ public class GeometryReaderUtil {
 
   public static void saveAsShapefile(String filepath, List<Geometry> geometries, String crs)
       throws IOException, FactoryException {
+    Long startTime = System.currentTimeMillis();
     File file = new File(filepath);
     Map<String, Serializable> params = new HashMap<String, Serializable>();
     params.put(ShapefileDataStoreFactory.URLP.key, file.toURI().toURL());
@@ -179,6 +180,10 @@ public class GeometryReaderUtil {
     writer.write();
     writer.close();
     ds.dispose();
+
+    Long endTime = System.currentTimeMillis();
+    System.out.println(
+            "*****************write shapefile ******************Took " + (endTime - startTime) / 1000 + "s");
   }
 
 
