@@ -56,6 +56,7 @@ class GeometryRDD extends Logging{
     val t1 = System.currentTimeMillis()
 
     this.geometryRDD = joinRDD.mapPartitions(IndexOperator.spatialIntersect)
+    this.geometryRDD = this.geometryRDD.repartition(5)
 
     val t2 = System.currentTimeMillis()
 
