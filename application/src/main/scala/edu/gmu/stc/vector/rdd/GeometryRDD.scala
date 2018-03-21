@@ -56,7 +56,7 @@ class GeometryRDD extends Logging{
     val t1 = System.currentTimeMillis()
 
     this.geometryRDD = joinRDD.mapPartitions(IndexOperator.spatialIntersect)
-    this.geometryRDD = this.geometryRDD.repartition(5)
+    //this.geometryRDD = this.geometryRDD.repartition(5)
 
     val t2 = System.currentTimeMillis()
 
@@ -128,6 +128,7 @@ class GeometryRDD extends Logging{
   def saveAsShapefile(filepath: String, crs: String): Unit = {
     val t = System.currentTimeMillis()
     val polygons = this.geometryRDD.collect().toList.asJava
+    println("************** collect overlap polygon size: " +polygons.size)
     println("************** collect overlap polygon time: " + (System.currentTimeMillis() - t)/1000000)
 
     GeometryReaderUtil.saveAsShapefile(filepath, polygons, crs)
