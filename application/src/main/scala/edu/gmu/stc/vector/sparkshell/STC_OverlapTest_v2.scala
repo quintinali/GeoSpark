@@ -1,16 +1,19 @@
 package edu.gmu.stc.vector.sparkshell
 
+import java.nio.file.{Files, Paths}
+
 import edu.gmu.stc.config.ConfigParameter
 import edu.gmu.stc.vector.operation.OperationUtil
 import edu.gmu.stc.vector.rdd.{GeometryRDD, ShapeFileMetaRDD}
 import edu.gmu.stc.vector.serde.VectorKryoRegistrator
 import edu.gmu.stc.vector.sparkshell.STC_OverlapTest_V1.{logError, logInfo}
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 import org.datasyslab.geospark.enums.{GridType, IndexType}
+import org.apache.hadoop.fs.Path
+import scala.reflect.io.{Directory, File}
 
 /**
   * Created by Fei Hu on 1/31/18.
@@ -18,16 +21,23 @@ import org.datasyslab.geospark.enums.{GridType, IndexType}
 object STC_OverlapTest_v2 extends Logging{
 
   def overlap(args: Array[String], sc: SparkContext, spark: SparkSession): String = {
-    if (args.length != 6) {
+    if (args.length != 7) {
       logError("You input "+ args.length + "arguments: " + args.mkString(" ") + ", but it requires 5 arguments: " +
         "\n \t 1)configFilePath: this file path for the configuration file path" +
         "\n \t 2) numPartition: the number of partitions" +
         "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +
         "\n \t 4) indexType: the index type for each partition, e.g. QUADTREE, RTREE" +
-        "\n \t 5) output file path: the file path for geojson output" +
-        "\n \t 6) crs: coordinate reference system")
+        "\n \t 5) output file path: the file path for output" +
+        "\n \t 6) output file format: the file format, either geojson or shapefile"+
+        "\n \t 7) crs: coordinate reference system")
 
       return ""
+    }
+
+    val outputFileDir = args(4)
+    var bexist = Files.exists(Paths.get(outputFileDir))
+    if(bexist){
+      return "The output file directory already exists, please set a new one"
     }
 
     sc.getConf
@@ -65,7 +75,7 @@ object STC_OverlapTest_v2 extends Logging{
       }
     }).collect()
 
-    partitionNum1.foreach(println)
+    //partitionNum1.foreach(println)
 
     val shapeFileMetaRDD2 = new ShapeFileMetaRDD(sc, hConf)
     val table2 = tableNames(1)
@@ -86,27 +96,35 @@ object STC_OverlapTest_v2 extends Logging{
     val geometryRDD = geometryRDD1.intersect(geometryRDD2)
     geometryRDD.cache()
 
-    val outputFilePath = args(4)
-    val crs = args(5)
-    if (outputFilePath.endsWith("shp")) {
+    val path: scala.reflect.io.Path = scala.reflect.io.Path (outputFileDir)
+    val folder = path.createDirectory(failIfExists=false)
+    val folderName = folder.name
+
+    val outputFileFormat = args(5)
+    val crs = args(6)
+    var outputFilePath = ""
+    if (outputFileFormat.equals("shp")) {
+      outputFilePath = folder.path + "/" + folderName + ".shp"
       geometryRDD.saveAsShapefile(outputFilePath, crs)
     } else {
+      outputFilePath = folder.path + "/" + folderName + ".geojson"
       geometryRDD.saveAsGeoJSON(outputFilePath)
     }
-
+    println("******** Number of intersected polygons: %d".format(geometryRDD.getGeometryRDD.count()))
     outputFilePath
   }
 
   def main(args: Array[String]): Unit = {
 
-    if (args.length != 6) {
+    if (args.length != 7) {
       logError("You input "+ args.length + "arguments: " + args.mkString(" ") + ", but it requires 5 arguments: " +
         "\n \t 1)configFilePath: this file path for the configuration file path" +
         "\n \t 2) numPartition: the number of partitions" +
         "\n \t 3) gridType: the type of the partition, e.g. EQUALGRID, HILBERT, RTREE, VORONOI, QUADTREE, KDBTREE" +
         "\n \t 4) indexType: the index type for each partition, e.g. QUADTREE, RTREE" +
-        "\n \t 5) output file path: the file path for geojson output" +
-        "\n \t 6) crs: coordinate reference system")
+        "\n \t 5) output file path: the file path for output" +
+        "\n \t 6) output file format: the file format, either geojson or shapefile"+
+        "\n \t 7) crs: coordinate reference system")
 
       return
     }
