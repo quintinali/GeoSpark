@@ -12,10 +12,13 @@ import org.apache.hadoop.fs.Path;
 import org.datasyslab.geospark.formatMapper.shapefileParser.parseUtils.dbf.DbfParseUtil;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.PrimitiveShape;
 import org.datasyslab.geospark.formatMapper.shapefileParser.shapes.ShpRecord;
+import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureWriter;
 import org.geotools.data.Transaction;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.data.simple.SimpleFeatureSource;
+import org.geotools.data.simple.SimpleFeatureStore;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
@@ -135,6 +138,8 @@ public class GeometryReaderUtil {
 
   public static void saveAsShapefile(String filepath, List<Geometry> geometries, String crs)
       throws IOException, FactoryException {
+    System.out.println(
+            "*****************start writing shapefile ******************");
     Long startTime = System.currentTimeMillis();
     File file = new File(filepath);
     Map<String, Serializable> params = new HashMap<String, Serializable>();
@@ -154,11 +159,6 @@ public class GeometryReaderUtil {
     tb.add("minLon", Double.class);
     tb.add("maxLat", Double.class);
     tb.add("maxLon", Double.class);
-
-    //tb.add("IDPoly1", Long.class);
-    //tb.add("IDPoly2", Long.class);
-
-
     ds.createSchema(tb.buildFeatureType());
     ds.setCharset(Charset.forName("GBK"));
 
@@ -170,22 +170,18 @@ public class GeometryReaderUtil {
       SimpleFeature feature = writer.next();
       feature.setAttribute("the_geom", geometries.get(i));
       feature.setAttribute("outPolyID", i);
-      Envelope env = geometries.get(i).getEnvelopeInternal();
+     /* Envelope env = geometries.get(i).getEnvelopeInternal();
       feature.setAttribute("minLat", env.getMinY());
       feature.setAttribute("minLon", env.getMinX());
       feature.setAttribute("maxLat", env.getMaxY());
-      feature.setAttribute("maxLon", env.getMaxX());
+      feature.setAttribute("maxLon", env.getMaxX());*/
+      writer.write();
     }
-
-    writer.write();
     writer.close();
     ds.dispose();
 
     Long endTime = System.currentTimeMillis();
     System.out.println(
-            "*****************write shapefile ******************Took " + (endTime - startTime) / 1000 + "s");
+            "*****************stop writing shapefile ******************Took " + (endTime - startTime) / 1000 + "s");
   }
-
-
-
 }
