@@ -84,10 +84,40 @@ public class TestShapeFileMeta {
     GeometryReaderUtil.saveAsShapefile("test.shp", geometries, "epsg:4326");
   }
 
+  public static void testSaveAsGeoJSON() throws IOException {
+    GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
+
+    Coordinate[] coords1  =
+        new Coordinate[] {new Coordinate(4, 0), new Coordinate(2, 2),
+                          new Coordinate(4, 4), new Coordinate(6, 2),
+                          new Coordinate(4, 0) };
+
+    LinearRing ring1 = geometryFactory.createLinearRing(coords1 );
+    LinearRing holes1[] = null; // use LinearRing[] to represent holes
+    Polygon polygon1 = geometryFactory.createPolygon(ring1, holes1 );
+
+    Coordinate[] coords2  =
+        new Coordinate[] {new Coordinate(14, 10), new Coordinate(12, 12),
+                          new Coordinate(14, 14), new Coordinate(16, 12),
+                          new Coordinate(14, 10) };
+
+    LinearRing ring2 = geometryFactory.createLinearRing(coords1 );
+    LinearRing holes2[] = null; // use LinearRing[] to represent holes
+    Polygon polygon2 = geometryFactory.createPolygon(ring2, holes2 );
+
+    List<Geometry> geometries = new ArrayList<Geometry>();
+    geometries.add(polygon1);
+    geometries.add(polygon2);
+
+    GeometryReaderUtil.saveAsGeoJSON("test/test.geojson", geometries, "epsg:4326");
+
+  }
+
   public static void main(String[] args) throws IOException, FactoryException {
     testSQLForOverlappedRows();
     testEnvolopHashCode();
     testSaveAsShapeFile();
+    testSaveAsGeoJSON();
   }
 
 }
