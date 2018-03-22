@@ -5,6 +5,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Polygon;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -25,6 +26,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.cs.CoordinateSystem;
+import org.wololo.geojson.Feature;
+import org.wololo.geojson.FeatureCollection;
+import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.io.File;
 import java.io.IOException;
@@ -181,6 +185,25 @@ public class GeometryReaderUtil {
     ds.dispose();
   }
 
+  public static void saveAsGeoJSON(String filepath, List<Geometry> geometries, String crs)
+      throws IOException {
+    GeoJSONWriter geoJSONWriter = new GeoJSONWriter();
+    Feature[] features = new Feature[geometries.size()];
+    int i = 0;
+    for (Geometry geometry : geometries) {
+      if (geometry.getUserData() != null) {
+        HashMap<String, Object> map = new HashMap<String, Object>();
+        map.put("UserData", geometry.getUserData());
+        features[i++] = new Feature(geoJSONWriter.write(geometry), map);
+      } else {
+        features[i++] = new Feature(geoJSONWriter.write(geometry), null);
+      }
+    }
 
+    FeatureCollection featureCollection = new FeatureCollection(features);
 
+    String geojsonStr = featureCollection.toString();
+    FileUtils.writeStringToFile(new File(filepath), geojsonStr);
+
+  }
 }
