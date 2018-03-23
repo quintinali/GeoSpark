@@ -22,6 +22,7 @@ import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.geojson.feature.FeatureJSON;
 import org.geotools.geojson.geom.GeometryJSON;
+import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -29,6 +30,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import com.amazonaws.util.json.JSONArray;
 import com.amazonaws.util.json.JSONObject;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,19 +53,25 @@ public class FileConverter {
      * @param shpPath
      * @return
      */
-    public static Map geojson2Shape(String jsonPath, String shpPath){
-        Map map = new HashMap();
+    public static String geojson2shp(String jsonFolder, String shpFolder, String crs){
+        String shpPath = "";
         GeometryJSON gjson = new GeometryJSON();
         try{
             //create shape file
+            File shpfolder = new File(shpFolder);
+            shpfolder.mkdir();
+            shpPath = shpfolder.getPath() + "/" + shpfolder.getName() + ".shp";
             File file = new File(shpPath);
+
             Map<String, Serializable> params = new HashMap<String, Serializable>();
             params.put( ShapefileDataStoreFactory.URLP.key, file.toURI().toURL() );
             ShapefileDataStore ds = (ShapefileDataStore) new ShapefileDataStoreFactory().createNewDataStore(params);
 
             //define attribute
             SimpleFeatureTypeBuilder tb = new SimpleFeatureTypeBuilder();
-            tb.setCRS(DefaultGeographicCRS.WGS84);
+            CoordinateReferenceSystem crsType = CRS.decode(crs);
+            tb.setCRS(crsType);
+
             tb.setName("shapefile");
             tb.add("the_geom", Polygon.class);
             tb.add("POIID", Long.class);
@@ -74,9 +82,8 @@ public class FileConverter {
             //set writer
             FeatureWriter<SimpleFeatureType, SimpleFeature> writer = ds.getFeatureWriter(ds.getTypeNames()[0], Transaction.AUTO_COMMIT);
 
-            File folder = new File(jsonPath);
+            File folder = new File(jsonFolder);
             File[] listOfFiles = folder.listFiles();
-
             int id = 0;
             for (int j = 0; j < listOfFiles.length; j++) {
                 if (listOfFiles[j].isFile()) {
@@ -92,7 +99,6 @@ public class FileConverter {
                         SimpleFeature feature = writer.next();
                         feature.setAttribute("the_geom", gjson.readPolygon(reader));
                         feature.setAttribute("POIID", id);
-
                         id += 1;
                         writer.write();
                     }
@@ -102,26 +108,21 @@ public class FileConverter {
             System.out.println( id + " polygons");
             writer.close();
             ds.dispose();
-            map.put("status", "success");
-            map.put("message", shpPath);
         }
         catch(Exception e){
-            map.put("status", "failure");
-            map.put("message", e.getMessage());
             e.printStackTrace();
         }
 
-        return map;
+        return shpPath;
     }
 
-    public static Map geometry2Shape(String jsonPath, String shpPath){
-        Map map = new HashMap();
+    public static String geometry2Shape(String jsonFolder, String shpFolder){
+        String shpPath = "";
         GeometryJSON gjson = new GeometryJSON();
         List<Geometry> geometries = new ArrayList<Geometry>();
         try{
-            File folder = new File(jsonPath);
+            File folder = new File(jsonFolder);
             File[] listOfFiles = folder.listFiles();
-            int id = 0;
             for (int j = 0; j < listOfFiles.length; j++) {
                 if (listOfFiles[j].isFile()) {
                     String filePath = listOfFiles[j].getPath();
@@ -129,18 +130,18 @@ public class FileConverter {
                     String strJson = new String(Files.readAllBytes(Paths.get(filePath)));
                     JSONObject json = new JSONObject(strJson);
                     JSONArray features = (JSONArray) json.get("features");
-                    //JSONObject feature0 = new JSONObject(features.get(0).toString());
                     for (int i = 0, len = features.length(); i < len; i++) {
                         String strFeature = features.get(i).toString();
                         Reader reader = new StringReader(strFeature);
                         Polygon polygon = gjson.readPolygon(reader);
                         geometries.add((Geometry) polygon);
-                        id += 1;
                     }
                 }
             }
 
-            System.out.println(id + " polygon in total");
+            File shpfolder = new File(shpFolder);
+            shpfolder.mkdir();
+            shpPath = shpfolder.getPath() + "/" + shpfolder.getName() + ".shp";
             GeometryReaderUtil.saveAsShapefile(shpPath, geometries, "epsg:4326");
             } catch (JSONException e1) {
             e1.printStackTrace();
@@ -150,7 +151,7 @@ public class FileConverter {
             e.printStackTrace();
         }
 
-        return map;
+        return shpPath;
     }
 
     public static void main(String[] args){
@@ -160,9 +161,10 @@ public class FileConverter {
         //String jsonPath = "D:/Desktop/test031612.geojson/part-00000.json";
         //Map map = fileFormat.shape2Geojson(shpPath, jsonPath);
 
-      String shpPath = "C:/Users/tinay/Desktop/shp032201.shp";
-      String jsonPath = "C:/Users/tinay/Desktop/json032201/";
-      Map map = FileConverter.geometry2Shape(jsonPath, shpPath);
+      //String shpPath = "C:/Users/tinay/Desktop/shp032201.shp";
+      String shpFolder = "C:/Users/tinay/Desktop/shp032201";
+      String jsonFolder = "C:/Users/tinay/Desktop/json032201/";
+      String shpPath = FileConverter.geometry2Shape(jsonFolder, shpFolder);
 
         System.out.println(shpPath+", took "+(System.currentTimeMillis() - start)/1000 +"s");
     }

@@ -2,6 +2,7 @@ package edu.gmu.stc.vector.rdd
 
 import com.vividsolutions.jts.geom.{Geometry, GeometryFactory}
 import com.vividsolutions.jts.index.SpatialIndex
+import edu.gmu.stc.vector.operation.FileConverter
 import edu.gmu.stc.vector.rdd.index.IndexOperator
 import edu.gmu.stc.vector.shapefile.meta.ShapeFileMeta
 import edu.gmu.stc.vector.shapefile.reader.GeometryReaderUtil
@@ -134,6 +135,17 @@ class GeometryRDD extends Logging{
     GeometryReaderUtil.saveAsShapefile(filepath, polygons, crs)
   }
 
+  def save2GeoJson2Shapfile(shpFolder: String, crs: String): Unit = {
+    val t = System.currentTimeMillis()
+    val polygons = this.geometryRDD.collect().toList.asJava
+    println("************** collect overlap polygon size: " +polygons.size)
+    println("************** collect overlap polygon time: " + (System.currentTimeMillis() - t)/1000000)
 
+    val jsonpath: scala.reflect.io.Path = scala.reflect.io.Path (shpFolder + "/" + "json/")
+    val jsonFolder = jsonpath.createDirectory(failIfExists=false)
+    val jsonFilePath = jsonFolder.path + "/" + jsonFolder.name + ".geojson"
+    GeometryReaderUtil.saveAsGeoJSON(jsonFilePath, polygons, crs)
+    GeometryReaderUtil.geojson2shp(jsonFolder.path, shpFolder, crs)
+  }
 
 }
