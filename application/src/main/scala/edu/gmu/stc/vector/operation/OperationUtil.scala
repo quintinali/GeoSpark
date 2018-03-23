@@ -104,19 +104,10 @@ object OperationUtil {
     val url = MapUtil.publishWMS(shpFolder, cfgPath)
     url
   }
-
-  def geojson2shp(jsonPath: String, shpPath: String): String = {
-    FileConverter.geojson2Shape(jsonPath, shpPath);
-    ""
-  }
-
-  def geometry2shp(jsonPath: String, shpPath: String): String = {
-    FileConverter.geometry2Shape(jsonPath, shpPath);
-    ""
-  }
-
+  
   def main(args: Array[String]): Unit = {
-    println(OperationUtil.publishWMS("/home/yun/test","/home/yun/GeoSpark/config/conf_dc.xml"))
-    //println(OperationUtil.publishWMS("D:\\python workspace\\data\\Soil_Type_by_Slope","D:\\geosparkWorkspace\\GeoSpark\\config\\conf.xml"))
+    //println(OperationUtil.publishWMS("/home/yun/test","/home/yun/GeoSpark/config/conf_dc.xml"))
+    println(OperationUtil.publishWMS("D:\\python workspace\\data\\Soil_Type_by_Slope","D:\\geosparkWorkspace\\GeoSpark\\config\\conf.xml"))
+
   }
 }
