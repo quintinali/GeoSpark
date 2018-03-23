@@ -75,7 +75,7 @@ public class Geoclient {
       double centerLat = Double.parseDouble(strCord[1]) + latOffset;
       String center = Double.toString(centerLon) + "," +  Double.toString(centerLat);
 
-      publishedUrl = this.restURL  + "/" + workspace_name +"/wms&" + workspace_name + ":" + datasetname +"&" + bbox +"&" + center;
+      publishedUrl = this.restURL  + "/" + workspace_name +"/wms|" + workspace_name + ":" + datasetname +"|" + bbox +"|" + center;
 
     }else{
       publishedUrl = "Failed to publish map." + publishedUrl;
